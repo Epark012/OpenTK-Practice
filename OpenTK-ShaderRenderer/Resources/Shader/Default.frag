@@ -11,4 +11,5 @@ void main()
 {
     vec4 texture = mix(texture(texture0, texCoord), texture(texture1, texCoord), 0.5);
     outputColor = mix(texture, vec4(1.0, 1.0, 0.0, 1.0), 0.1);
+    // outputColor = vec4(1.0, 1.0, 0.0, 1.0);
 }

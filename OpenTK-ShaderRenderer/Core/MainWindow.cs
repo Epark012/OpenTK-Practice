@@ -15,11 +15,12 @@ namespace OpenTK_Renderer
         private bool _firstMove = true;
         private Vector2 _lastPos;
         
+        private double _time;
+        private Mesh _mesh;
+        
         #region Test
 
         private Vector3[] _position = new Vector3[10];
-
-        private Mesh _mesh;
         
         #endregion
 
@@ -92,6 +93,7 @@ namespace OpenTK_Renderer
         private Shader _shader;
         private Texture _texture;
         private Texture _texture2;
+        private Shader _lightShader;
 
         protected override void OnLoad()
         {
@@ -142,6 +144,14 @@ namespace OpenTK_Renderer
             texs.Add(_texture2);
             
             _mesh = new Mesh(vertices, indices.ToList(), texs);
+
+            // _model = new Model("Resources/Model/Sphere.obj");
+
+            #region Lighting
+
+            _lightShader = new Shader("Resources/Shader/Light.vert", "Resources/Shader/Light.frag");
+            
+            #endregion
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -154,8 +164,7 @@ namespace OpenTK_Renderer
             // Get the mouse state
             ProcessMouseInput();
         }
-        private double _time;
-
+  
         protected override void OnRenderFrame(FrameEventArgs args)
         {
             base.OnRenderFrame(args);
@@ -176,10 +185,22 @@ namespace OpenTK_Renderer
                     _shader.SetUniform<Matrix4>("model", model);
                     _shader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
                     _shader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
-                
+
+                    // _model.Draw(_shader);
                     _mesh.Draw(_shader);
-                    // GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
                 }
+                
+                // Light
+                _lightShader.Use();
+
+                var lightModel = Matrix4.Identity * Matrix4.CreateTranslation(0, 0, 0);
+                lightModel *= Matrix4.CreateScale(0.1f);
+                
+                _lightShader.SetUniform<Matrix4>("model", lightModel);
+                _lightShader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
+                _lightShader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
+                
+                _mesh.Draw(_lightShader);
             }
 
             SwapBuffers();
@@ -256,7 +277,11 @@ namespace OpenTK_Renderer
                 _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
             }
         }
-
+        
+        /// <summary>
+        /// Callback for resizing window
+        /// </summary>
+        /// <param name="e">Event args</param>
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
