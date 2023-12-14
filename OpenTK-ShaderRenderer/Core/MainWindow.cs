@@ -14,13 +14,13 @@ namespace OpenTK_Renderer
         private Camera _camera;
         private bool _firstMove = true;
         private Vector2 _lastPos;
-
-        private int _vao, _vbo, _ebo;
-
+        
         #region Test
 
         private Vector3[] _position = new Vector3[10];
 
+        private Mesh _mesh;
+        
         #endregion
 
         float[] _vertices = {
@@ -62,7 +62,8 @@ namespace OpenTK_Renderer
           -0.5f, -0.5f,  0.5f,    -1.0f, 0.0f, 0.0f,      0.0f, 1.0f
         };
 
-        uint[] indices = {  // note that we start from 0!
+        uint[] indices = 
+        {
            // Up
             0, 3, 1,
             1, 3, 2,   
@@ -105,41 +106,7 @@ namespace OpenTK_Renderer
             // Enable depth
             GL.Enable(EnableCap.DepthTest);
 
-            // Vao
-            _vao = GL.GenVertexArray();
-            GL.BindVertexArray(_vao);
-
-            // Vbo
-            _vbo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
-
-            _ebo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
-
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
-
-            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
-            GL.EnableVertexAttribArray(1);
-
-            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
-            GL.EnableVertexAttribArray(2);
-
             _shader = new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag");
-
-            var vertexLocation = _shader.GetAttribLocation("aPosition");
-            GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-
-            var texCoordLocation = _shader.GetAttribLocation("aNormal");
-            GL.EnableVertexAttribArray(texCoordLocation);
-            GL.VertexAttribPointer(texCoordLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
-
-            var normal = _shader.GetAttribLocation("aTexCoord");
-            GL.EnableVertexAttribArray(texCoordLocation);
-            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
 
             _texture = Texture.LoadFromFile("Resources/Image/container.png");
             _texture2 = Texture.LoadFromFile("Resources/Image/wall.jpg");
@@ -158,6 +125,23 @@ namespace OpenTK_Renderer
             {
                 _position[i] = new Vector3(random.Next(-5, 5), random.Next(-5, 5), random.Next(-5, 5));
             }
+
+            var vertices = new List<Vertex>();
+            for (int i = 0; i < _vertices.Length / 8; i++)
+            {
+                var cycle = i * 8;
+                var pos = new Vector3(_vertices[0 + cycle], _vertices[1 + cycle], _vertices[2 + cycle]);
+                var normals = new Vector3(_vertices[3 + cycle], _vertices[4 + cycle], _vertices[5 + cycle]);
+                var tex = new Vector2(_vertices[6 + cycle], _vertices[7 + cycle]);
+
+                vertices.Add(new Vertex(pos, normals, tex));
+            }
+
+            var texs = new List<Texture>();
+            texs.Add(_texture);
+            texs.Add(_texture2);
+            
+            _mesh = new Mesh(vertices, indices.ToList(), texs);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -179,24 +163,22 @@ namespace OpenTK_Renderer
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             {
-                GL.BindVertexArray(_vao);
-
-                _texture.Use(TextureUnit.Texture0);
-                _texture2.Use(TextureUnit.Texture1);
                 _shader.Use();
-
+                
                 _time += 40.0 * args.Time;
-                foreach (var t in _position)
+                for (var i = 0; i < _position.Length; i++)
                 {
+                    var t = _position[i];
                     var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
                     Matrix4.CreateTranslation(t, out var newPos);
                     model *= newPos;
-                    
+                
                     _shader.SetUniform<Matrix4>("model", model);
                     _shader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
                     _shader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
                 
-                    GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+                    _mesh.Draw(_shader);
+                    // GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
                 }
             }
 

@@ -1,6 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using StbImageSharp;
-using System.Reflection.Metadata;
 
 namespace OpenTK_Renderer
 {
