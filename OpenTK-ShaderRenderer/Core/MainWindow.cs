@@ -151,6 +151,8 @@ namespace OpenTK_Renderer
 
             _lightShader = new Shader("Resources/Shader/Light.vert", "Resources/Shader/Light.frag");
             
+            _lightMesh = new Mesh(vertices, indices.ToList(), texs);
+            
             #endregion
         }
 
@@ -164,7 +166,12 @@ namespace OpenTK_Renderer
             // Get the mouse state
             ProcessMouseInput();
         }
-  
+
+        private Vector3 objectColor = new Vector3(1.0f, 0.5f, 0.31f);
+        private Vector3 lightPos = Vector3.Zero;
+        private Vector3 lightColor = Vector3.One;
+        private Mesh _lightMesh;
+
         protected override void OnRenderFrame(FrameEventArgs args)
         {
             base.OnRenderFrame(args);
@@ -178,13 +185,18 @@ namespace OpenTK_Renderer
                 for (var i = 0; i < _position.Length; i++)
                 {
                     var t = _position[i];
-                    var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
+                    var model = Matrix4.Identity; // * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
                     Matrix4.CreateTranslation(t, out var newPos);
                     model *= newPos;
-                
+
                     _shader.SetUniform<Matrix4>("model", model);
                     _shader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
                     _shader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
+                    
+                    _shader.SetUniform(nameof(objectColor), objectColor);
+                    _shader.SetUniform(nameof(lightColor), lightColor);
+                    _shader.SetUniform(nameof(lightPos), Vector3.Zero);
+                    _shader.SetUniform("viewPos", _camera.Position);
 
                     // _model.Draw(_shader);
                     _mesh.Draw(_shader);
@@ -200,7 +212,7 @@ namespace OpenTK_Renderer
                 _lightShader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
                 _lightShader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
                 
-                _mesh.Draw(_lightShader);
+                _lightMesh.Draw(_lightShader);
             }
 
             SwapBuffers();
