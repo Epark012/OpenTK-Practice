@@ -15,7 +15,6 @@ namespace OpenTK_Renderer
         private bool _firstMove = true;
         private Vector2 _lastPos;
         
-        private double _time;
         private Mesh _mesh;
         
         #region Test
@@ -167,8 +166,8 @@ namespace OpenTK_Renderer
             ProcessMouseInput();
         }
 
-        private Vector3 objectColor = new Vector3(1.0f, 0.5f, 0.31f);
-        private Vector3 lightPos = Vector3.Zero;
+        private Vector3 objectColor = new Vector3(0.20f, 0.6f, 0.31f);
+        private Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
         private Vector3 lightColor = Vector3.One;
         private Mesh _lightMesh;
 
@@ -179,13 +178,13 @@ namespace OpenTK_Renderer
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             {
+                
                 _shader.Use();
                 
-                _time += 40.0 * args.Time;
                 for (var i = 0; i < _position.Length; i++)
                 {
                     var t = _position[i];
-                    var model = Matrix4.Identity; // * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));
+                    var model = Matrix4.Identity;
                     Matrix4.CreateTranslation(t, out var newPos);
                     model *= newPos;
 
@@ -195,7 +194,7 @@ namespace OpenTK_Renderer
                     
                     _shader.SetUniform(nameof(objectColor), objectColor);
                     _shader.SetUniform(nameof(lightColor), lightColor);
-                    _shader.SetUniform(nameof(lightPos), Vector3.Zero);
+                    _shader.SetUniform(nameof(lightPos), lightPos);
                     _shader.SetUniform("viewPos", _camera.Position);
 
                     // _model.Draw(_shader);
@@ -206,7 +205,7 @@ namespace OpenTK_Renderer
                 _lightShader.Use();
 
                 var lightModel = Matrix4.Identity * Matrix4.CreateTranslation(0, 0, 0);
-                lightModel *= Matrix4.CreateScale(0.1f);
+                lightModel *= Matrix4.CreateScale(0.2f);
                 
                 _lightShader.SetUniform<Matrix4>("model", lightModel);
                 _lightShader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
