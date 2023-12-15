@@ -121,6 +121,16 @@ public class Mesh
         GL.BindVertexArray(0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
     }
+
+    public void UseTexture()
+    {
+        var baseUnit = TextureUnit.Texture0;
+        for (var i = 0; i < Textures.Count; i++)
+        {
+            var texture = Textures[i];
+            texture.Use(baseUnit + i);
+        }
+    }
 }
 
 public struct Vertex

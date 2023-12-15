@@ -20,7 +20,19 @@ namespace OpenTK_Renderer
         
         #region Test
 
-        private Vector3[] _position = new Vector3[10];
+        private readonly Vector3[] _position = 
+        {
+            new (3.0f, 0.5f, -5.0f),
+            new (2.0f, 5.0f, -15.0f),
+            new (-1.5f, -2.2f, -2.5f),
+            new (-3.8f, -2.0f, -12.3f),
+            new (2.4f, -0.4f, -3.5f),
+            new (-1.7f, 3.0f, -7.5f),
+            new (1.3f, -2.0f, -2.5f),
+            new (1.5f, 2.0f, -2.5f),
+            new (1.5f, 0.2f, -1.5f),
+            new (-1.3f, 1.0f, -1.5f)
+        };
         
         #endregion
 
@@ -121,13 +133,7 @@ namespace OpenTK_Renderer
             _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
             CursorState = CursorState.Grabbed;
             
-            // Create random position
-            var random = new Random();
-            for (var i = 0; i < _position.Length; i++)
-            {
-                _position[i] = new Vector3(random.Next(-5, 5), random.Next(-5, 5), random.Next(-5, 5));
-            }
-
+            // Convert vertice
             var vertices = new List<Vertex>();
             for (int i = 0; i < _vertices.Length / 8; i++)
             {
@@ -172,7 +178,6 @@ namespace OpenTK_Renderer
         }
 
         private Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
-        private Vector3 lightColor = Vector3.One;
         private Mesh _lightMesh;
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -182,32 +187,32 @@ namespace OpenTK_Renderer
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             {
-                
                 _shader.Use();
                 
+                _shader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
+                _shader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
+                
+                _shader.SetUniform("viewPos", _camera.Position);
+
+                _shader.SetUniform("material.diffuse", 0);
+                _shader.SetUniform("material.specular", 1);
+                // _shader.SetUniform("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
+                _shader.SetUniform("material.shininess", 32.0f);
+                    
+                _shader.SetUniform("light.direction", new Vector3(-0.2f, -1.0f, -0.3f));
+                _shader.SetUniform("light.ambient", new Vector3(0.2f));
+                _shader.SetUniform("light.diffuse", new Vector3(0.5f));
+                _shader.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+                
+                float time = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
+
                 for (var i = 0; i < _position.Length; i++)
                 {
-                    var t = _position[i];
-                    var model = Matrix4.Identity;
-                    Matrix4.CreateTranslation(t, out var newPos);
-                    model *= newPos;
+                    var model = Matrix4.CreateTranslation(_position[i]);
+                    var angle = 20f * i * (time / 100);
+                    model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f, 0.3f, 0.5f), angle);
 
                     _shader.SetUniform<Matrix4>("model", model);
-                    _shader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
-                    _shader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
-                    
-                    _shader.SetUniform("material.diffuse", 0);
-                    _shader.SetUniform("material.specular", 1);
-                    _shader.SetUniform("material.shininess", 32.0f);
-                    
-                    // The ambient light is less intensive than the diffuse light in order to make it less dominant
-                    var ambientColor = lightColor * new Vector3(0.2f);
-                    var diffuseColor = lightColor * new Vector3(1f);
-
-                    _shader.SetUniform("light.position", lightPos);
-                    _shader.SetUniform("light.ambient", ambientColor);
-                    _shader.SetUniform("light.diffuse", diffuseColor);
-                    _shader.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
 
                     // _model.Draw(_shader);
                     _mesh.Draw(_shader);
