@@ -166,7 +166,6 @@ namespace OpenTK_Renderer
             ProcessMouseInput();
         }
 
-        private Vector3 objectColor = new Vector3(0.20f, 0.6f, 0.31f);
         private Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
         private Vector3 lightColor = Vector3.One;
         private Mesh _lightMesh;
@@ -192,10 +191,19 @@ namespace OpenTK_Renderer
                     _shader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
                     _shader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
                     
-                    _shader.SetUniform(nameof(objectColor), objectColor);
-                    _shader.SetUniform(nameof(lightColor), lightColor);
-                    _shader.SetUniform(nameof(lightPos), lightPos);
-                    _shader.SetUniform("viewPos", _camera.Position);
+                    _shader.SetUniform("material.ambient", new Vector3(1.0f, 0.5f, 0.31f));
+                    _shader.SetUniform("material.diffuse", new Vector3(1.0f, 0.5f, 0.31f));
+                    _shader.SetUniform("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
+                    _shader.SetUniform("material.shininess", 32.0f);
+                    
+                    // The ambient light is less intensive than the diffuse light in order to make it less dominant
+                    var ambientColor = lightColor * new Vector3(0.2f);
+                    var diffuseColor = lightColor * new Vector3(0.5f);
+
+                    _shader.SetUniform("light.position", lightPos);
+                    _shader.SetUniform("light.ambient", ambientColor);
+                    _shader.SetUniform("light.diffuse", diffuseColor);
+                    _shader.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
 
                     // _model.Draw(_shader);
                     _mesh.Draw(_shader);
@@ -204,7 +212,7 @@ namespace OpenTK_Renderer
                 // Light
                 _lightShader.Use();
 
-                var lightModel = Matrix4.Identity * Matrix4.CreateTranslation(0, 0, 0);
+                var lightModel = Matrix4.Identity * Matrix4.CreateTranslation(lightPos);
                 lightModel *= Matrix4.CreateScale(0.2f);
                 
                 _lightShader.SetUniform<Matrix4>("model", lightModel);
