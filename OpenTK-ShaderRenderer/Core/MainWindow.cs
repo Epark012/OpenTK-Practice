@@ -198,7 +198,7 @@ namespace OpenTK_Renderer
                     
                     // The ambient light is less intensive than the diffuse light in order to make it less dominant
                     var ambientColor = lightColor * new Vector3(0.2f);
-                    var diffuseColor = lightColor * new Vector3(0.5f);
+                    var diffuseColor = lightColor * new Vector3(1f);
 
                     _shader.SetUniform("light.position", lightPos);
                     _shader.SetUniform("light.ambient", ambientColor);
