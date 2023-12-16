@@ -7,7 +7,7 @@ public class Mesh
 {
     public List<Vertex> Vertices;
     public List<uint> Indices;
-    public List<Texture> Textures;
+    public List<Texture> Textures = new List<Texture>();
 
     private int _vao, _vbo, _ebo;
     private int _indiceCount;
@@ -16,7 +16,7 @@ public class Mesh
     {
         Vertices = vertices;
         Indices = indices;
-        Textures = textures;
+        Textures = textures ??= new List<Texture>();
 
         UpdateBuffer();
     }
@@ -120,16 +120,6 @@ public class Mesh
         // Clear binding texture to default
         GL.BindVertexArray(0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
-    }
-
-    public void UseTexture()
-    {
-        var baseUnit = TextureUnit.Texture0;
-        for (var i = 0; i < Textures.Count; i++)
-        {
-            var texture = Textures[i];
-            texture.Use(baseUnit + i);
-        }
     }
 }
 

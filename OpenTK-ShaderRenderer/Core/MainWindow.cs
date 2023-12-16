@@ -208,9 +208,10 @@ namespace OpenTK_Renderer
 
                 for (var i = 0; i < _position.Length; i++)
                 {
-                    var model = Matrix4.CreateTranslation(_position[i]);
-                    var angle = 20f * i * (time / 100);
-                    model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f, 0.3f, 0.5f), angle);
+                    var model = Matrix4.Identity;
+                    var angle = 20f * i;
+                    model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), angle * (time / 100));
+                    model *= Matrix4.CreateTranslation(_position[i]);
 
                     _shader.SetUniform<Matrix4>("model", model);
 
