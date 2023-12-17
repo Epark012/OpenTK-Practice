@@ -9,7 +9,6 @@ namespace OpenTK_Renderer
     public class MainWindow : GameWindow
     {
         public MainWindow(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { Title = title, ClientSize = (width, height) }) { }
-        // private Vector4 _initialBackgroundColor = new Vector4(0.8f, 0.674f, 0.6313f, 1.0f);
         private readonly Vector4 _initialBackgroundColor = new (0.2f, 0.3f, 0.3f, 1.0f);
 
         private Camera _camera;
@@ -17,8 +16,6 @@ namespace OpenTK_Renderer
         private Vector2 _lastPos;
         
         private Mesh _mesh;
-        
-        #region Test
 
         private readonly Vector3[] _position = 
         {
@@ -34,8 +31,14 @@ namespace OpenTK_Renderer
             new (-1.3f, 1.0f, -1.5f)
         };
         
-        #endregion
-
+        private readonly Vector3[] _pointLightPositions =
+        {
+            new Vector3(0.7f, 0.2f, 2.0f),
+            new Vector3(2.3f, -3.3f, -4.0f),
+            new Vector3(-4.0f, 2.0f, -12.0f),
+            new Vector3(0.0f, 0.0f, -3.0f)
+        };
+        
         float[] _vertices = {
            // Position            Normal                  Texture coordinates  
            // Up
@@ -199,10 +202,35 @@ namespace OpenTK_Renderer
                 // _shader.SetUniform("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
                 _shader.SetUniform("material.shininess", 32.0f);
                     
-                _shader.SetUniform("light.direction", new Vector3(-0.2f, -1.0f, -0.3f));
-                _shader.SetUniform("light.ambient", new Vector3(0.2f));
-                _shader.SetUniform("light.diffuse", new Vector3(0.5f));
-                _shader.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+                // Directional light
+                _shader.SetUniform("dirLight.direction", new Vector3(-0.2f, -1.0f, -0.3f));
+                _shader.SetUniform("dirLight.ambient", new Vector3(0.05f, 0.05f, 0.05f));
+                _shader.SetUniform("dirLight.diffuse", new Vector3(0.4f, 0.4f, 0.4f));
+                _shader.SetUniform("dirLight.specular", new Vector3(0.5f, 0.5f, 0.5f));
+                
+                // Point lights
+                for (int i = 0; i < _pointLightPositions.Length; i++)
+                {
+                    _shader.SetUniform($"pointLights[{i}].position", _pointLightPositions[i]);
+                    _shader.SetUniform($"pointLights[{i}].ambient", new Vector3(0.05f, 0.05f, 0.05f));
+                    _shader.SetUniform($"pointLights[{i}].diffuse", new Vector3(0.8f, 0.8f, 0.8f));
+                    _shader.SetUniform($"pointLights[{i}].specular", new Vector3(1.0f, 1.0f, 1.0f));
+                    _shader.SetUniform($"pointLights[{i}].constant", 1.0f);
+                    _shader.SetUniform($"pointLights[{i}].linear", 0.09f);
+                    _shader.SetUniform($"pointLights[{i}].quadratic", 0.032f);
+                }
+                
+                // Spot light
+                _shader.SetUniform("spotLight.position", _camera.Position);
+                _shader.SetUniform("spotLight.direction", _camera.Front);
+                _shader.SetUniform("spotLight.ambient", new Vector3(0.0f, 0.0f, 0.0f));
+                _shader.SetUniform("spotLight.diffuse", new Vector3(1.0f, 1.0f, 1.0f));
+                _shader.SetUniform("spotLight.specular", new Vector3(1.0f, 1.0f, 1.0f));
+                _shader.SetUniform("spotLight.constant", 1.0f);
+                _shader.SetUniform("spotLight.linear", 0.09f);
+                _shader.SetUniform("spotLight.quadratic", 0.032f);
+                _shader.SetUniform("spotLight.cutOff", MathF.Cos(MathHelper.DegreesToRadians(12.5f)));
+                _shader.SetUniform("spotLight.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(17.5f)));
                 
                 float time = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
 
