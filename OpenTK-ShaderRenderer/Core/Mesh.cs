@@ -5,69 +5,25 @@ namespace OpenTK_Renderer;
 
 public class Mesh
 {
-    public List<Vertex> Vertices;
-    public List<uint> Indices;
-    public List<Texture> Textures = new List<Texture>();
+    public Vertex[] Vertices;
+    public uint[] Indices;
+    public Texture[] Textures;
 
     private int _vao, _vbo, _ebo;
-    private int _indiceCount;
-    
-    public Mesh(List<Vertex> vertices, List<uint> indices, List<Texture> textures)
+    public Mesh(Vertex[] vertices, uint[] indices, Texture[] textures)
     {
         Vertices = vertices;
         Indices = indices;
-        Textures = textures ??= new List<Texture>();
-
+        Textures = textures;
+        
         UpdateBuffer();
     }
 
-    float[] _vertices = 
-    {
-         // Position            Normal                  Texture coordinates  
-         // Up
-         0.5f,  0.5f, 0.5f,     0.0f, 0.0f, 1.0f,       1.0f, 1.0f,
-         0.5f, -0.5f, 0.5f,     0.0f, 0.0f, 1.0f,       1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f,     0.0f, 0.0f, 1.0f,       0.0f, 0.0f,
-        -0.5f,  0.5f, 0.5f,     0.0f, 0.0f, 1.0f,       0.0f, 1.0f,
-                      
-          // Down                 
-         0.5f,  0.5f, -0.5f,    0.0f, 0.0f, -1.0f,      1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,    0.0f, 0.0f, -1.0f,      1.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, -1.0f,      0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,    0.0f, 0.0f, -1.0f,      0.0f, 1.0f,
-                      
-          // Foward               
-         0.5f, -0.5f, 0.5f,     0.0f, -1.0f, 0.0f,      1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,    0.0f, -1.0f, 0.0f,      1.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, -1.0f, 0.0f,      0.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,    0.0f, -1.0f, 0.0f,      0.0f, 1.0f,
-                      
-          // Back                 
-         0.5f, 0.5f, 0.5f,      0.0f, 1.0f, 0.0f,       1.0f, 1.0f,
-         0.5f, 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,       1.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,       0.0f, 0.0f,
-        -0.5f, 0.5f,  0.5f,     0.0f, 1.0f, 0.0f,       0.0f, 1.0f,
-                      
-          // Right                
-         0.5f,  0.5f, 0.5f,      1.0f, 0.0f, 0.0f,       1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,     1.0f, 0.0f, 0.0f,       1.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,     1.0f, 0.0f, 0.0f,       0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,     1.0f, 0.0f, 0.0f,       0.0f, 1.0f,
-                      
-          // Left                 
-        -0.5f,  0.5f, 0.5f,     -1.0f, 0.0f, 0.0f,      1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,    -1.0f, 0.0f, 0.0f,      1.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,    -1.0f, 0.0f, 0.0f,      0.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,    -1.0f, 0.0f, 0.0f,      0.0f, 1.0f
-    };
-    
     /// <summary>
     /// Update buffer
     /// </summary>
     private void UpdateBuffer()
     {
-        _indiceCount = Indices.Count;
-        
         // Vao
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
@@ -77,25 +33,43 @@ public class Mesh
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
         
         // TODO: Need to know why this is not working
-        // GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Count * Vertex.Stride, Vertices.ToArray(), BufferUsageHint.StaticDraw);
-        GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Count * Vertex.Stride, _vertices, BufferUsageHint.StaticDraw);
+        // GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Length * Vertex.Stride, Vertices.ToArray(), BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Length * Vertex.Stride, Vertices, BufferUsageHint.StaticDraw);
         
         _ebo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, _indiceCount * sizeof(uint), Indices.ToArray(), BufferUsageHint.StaticDraw);
-        
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 0);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, Indices.Length * sizeof(uint), Indices, BufferUsageHint.StaticDraw);
+
         GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 0);
 
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 3 * sizeof(float));
         GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 3 * sizeof(float));
 
-        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Vertex.Stride, 6 * sizeof(float));
         GL.EnableVertexAttribArray(2);
-        
+        GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 6 * sizeof(float));
+
         // Clear vertex array
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         GL.BindVertexArray(0);
+
+        Console.WriteLine("Vertices");
+        Console.WriteLine("---------------");
+        foreach (var vertex in Vertices)
+        {
+            Console.WriteLine(vertex.Position);
+        }
+        Console.WriteLine("---------------");
+        Console.WriteLine("");
+        Console.WriteLine("");
+        Console.WriteLine("");
+        Console.WriteLine("");
+        Console.WriteLine("Indices");
+        Console.WriteLine("---------------");
+        foreach (var index in Indices)
+        {
+            Console.WriteLine(index);
+        }
+        Console.WriteLine("---------------");
     }
 
     /// <summary>
@@ -107,15 +81,15 @@ public class Mesh
         GL.BindVertexArray(_vao);
         
         // Apply texture
-        var baseUnit = TextureUnit.Texture0;
-        for (var i = 0; i < Textures.Count; i++)
-        {
-            var texture = Textures[i];
-            texture.Use(baseUnit + i);
-        }
+        // var baseUnit = TextureUnit.Texture0;
+        // for (var i = 0; i < Textures.Length; i++)
+        // {
+        //     var texture = Textures[i];
+        //     texture.Use(baseUnit + i);
+        // }
 
         // Draw mesh
-        GL.DrawElements(PrimitiveType.Triangles, _indiceCount, DrawElementsType.UnsignedInt, 0);
+        GL.DrawElements(PrimitiveType.Triangles, Indices.Length, DrawElementsType.UnsignedInt, 0);
         
         // Clear binding texture to default
         GL.BindVertexArray(0);

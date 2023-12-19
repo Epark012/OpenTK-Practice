@@ -7,6 +7,7 @@ namespace OpenTK_Renderer;
 public class Model : IDisposable
 {
     public List<Mesh> Meshes = new ();
+    private readonly Scene _raw;
 
     public Model(string path)
     {
@@ -24,15 +25,15 @@ public class Model : IDisposable
 
                 //Import the model. All configs are set. The model
                 //is imported, loaded into managed memory. Then the unmanaged memory is released, and everything is reset.
-                var scene = context.ImportFile(path, PostProcessPreset.TargetRealTimeMaximumQuality);
-                if (scene == null)
+                _raw = context.ImportFile(path, PostProcessSteps.CalculateTangentSpace | PostProcessSteps.JoinIdenticalVertices | PostProcessSteps.SortByPrimitiveType);
+                if (_raw == null)
                 {
                     Dispose();
                     throw new Exception($"Failed to read file : {path}");
                 }
                 
                 //TODO: Load the model data into your own structures
-                ProcessNode(scene.RootNode, scene);
+                ProcessNode(_raw.RootNode, _raw);
             }
         }
         catch (AssimpException e)
@@ -86,7 +87,8 @@ public class Model : IDisposable
             }
         }
 
-        return new Mesh(vertice, indices, null);
+        var result = new Mesh(vertice.ToArray(), indices.ToArray(), null); 
+        return result;
     }
 
     public void Draw(Shader shader)

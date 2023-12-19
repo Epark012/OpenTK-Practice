@@ -73,6 +73,9 @@ vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir
 
 void main()
 {
+    outputColor = vec4(1,1,1,1);
+    return;
+    
     // Properties
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);

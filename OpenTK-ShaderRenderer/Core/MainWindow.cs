@@ -156,15 +156,15 @@ namespace OpenTK_Renderer
             texs.Add(_texture);
             texs.Add(_texture2);
             
-            _mesh = new Mesh(vertices, indices.ToList(), texs);
+            // _mesh = new Mesh(vertices.ToArray(), indices, texs.ToArray());
 
-            // _model = new Model("Resources/Model/Sphere.obj");
+            _model = new Model("Resources/Model/Cube.obj");
 
             #region Lighting
 
             _lightShader = new Shader("Resources/Shader/Light.vert", "Resources/Shader/Light.frag");
             
-            _lightMesh = new Mesh(vertices, indices.ToList(), texs);
+            _lightMesh = new Mesh(vertices.ToArray(), indices, texs.ToArray());
             
             #endregion
         }
@@ -182,6 +182,7 @@ namespace OpenTK_Renderer
 
         private Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
         private Mesh _lightMesh;
+        private Model _model;
 
         protected override void OnRenderFrame(FrameEventArgs args)
         {
@@ -234,18 +235,24 @@ namespace OpenTK_Renderer
                 
                 float time = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
 
-                for (var i = 0; i < _position.Length; i++)
-                {
-                    var model = Matrix4.Identity;
-                    var angle = 20f * i;
-                    model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), angle * (time / 100));
-                    model *= Matrix4.CreateTranslation(_position[i]);
+                var model = Matrix4.Identity;
+                model *= Matrix4.CreateTranslation(new Vector3(0, 0, 3));
+                _shader.SetUniform<Matrix4>("model", model);
 
-                    _shader.SetUniform<Matrix4>("model", model);
-
-                    // _model.Draw(_shader);
-                    _mesh.Draw(_shader);
-                }
+                _model.Draw(_shader);
+                
+                // for (var i = 0; i < _position.Length; i++)
+                // {
+                //     var model = Matrix4.Identity;
+                //     var angle = 20f * i;
+                //     model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), angle * (time / 100));
+                //     model *= Matrix4.CreateTranslation(_position[i]);
+                // 
+                //     _shader.SetUniform<Matrix4>("model", model);
+                // 
+                //     _model.Draw(_shader);
+                //     // _mesh.Draw(_shader);
+                // }
                 
                 // Light
                 _lightShader.Use();
