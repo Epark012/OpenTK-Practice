@@ -15,8 +15,6 @@ namespace OpenTK_Renderer
         private bool _firstMove = true;
         private Vector2 _lastPos;
         
-        private Mesh _mesh;
-
         private readonly Vector3[] _position = 
         {
             new (3.0f, 0.5f, -5.0f),
@@ -39,79 +37,6 @@ namespace OpenTK_Renderer
             new Vector3(0.0f, 0.0f, -3.0f)
         };
         
-        float[] _vertices = {
-           // Position            Normal                  Texture coordinates  
-           // Up
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-
-            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-        };
-
-        uint[] indices = 
-        {
-           // Up
-            0, 3, 1,
-            1, 3, 2,   
-            
-            // Down
-            4, 7, 5,
-            5, 7, 6,
-
-            // Foward
-            8, 11, 09,
-            9, 11, 10,
-
-            // Back
-            12, 15, 13,
-            13, 15, 14,
-
-            // Right
-            16, 17, 19,
-            17, 18, 19,
-
-            // Left
-            20, 21, 23,
-            21, 22, 23,
-        };
-
         private Shader _shader;
         private Texture _texture;
         private Texture _texture2;
@@ -136,18 +61,6 @@ namespace OpenTK_Renderer
             _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
             CursorState = CursorState.Grabbed;
             
-            // Convert vertice
-            var vertices = new List<Vertex>();
-            for (int i = 0; i < _vertices.Length / 8; i++)
-            {
-                var cycle = i * 8;
-                var pos = new Vector3(_vertices[0 + cycle], _vertices[1 + cycle], _vertices[2 + cycle]);
-                var normals = new Vector3(_vertices[3 + cycle], _vertices[4 + cycle], _vertices[5 + cycle]);
-                var tex = new Vector2(_vertices[6 + cycle], _vertices[7 + cycle]);
-
-                vertices.Add(new Vertex(pos, normals, tex));
-            }
-
             // Create textures
             _texture = Texture.LoadFromFile("Resources/Image/container.png");
             _texture2 = Texture.LoadFromFile("Resources/Image/container_specular.png");
@@ -156,15 +69,12 @@ namespace OpenTK_Renderer
             texs.Add(_texture);
             texs.Add(_texture2);
             
-            // _mesh = new Mesh(vertices.ToArray(), indices, texs.ToArray());
-
-            _model = new Model("Resources/Model/Cube.obj");
+            _model = new Model("Resources/Model/Cube.fbx");
 
             #region Lighting
 
             _lightShader = new Shader("Resources/Shader/Light.vert", "Resources/Shader/Light.frag");
-            
-            _lightMesh = new Mesh(vertices.ToArray(), indices, texs.ToArray());
+            _lightModel = new Model("Resources/Model/Cube.fbx");
             
             #endregion
         }
@@ -181,7 +91,8 @@ namespace OpenTK_Renderer
         }
 
         private Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
-        private Mesh _lightMesh;
+        
+        private Model _lightModel;
         private Model _model;
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -235,24 +146,17 @@ namespace OpenTK_Renderer
                 
                 float time = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
 
-                var model = Matrix4.Identity;
-                model *= Matrix4.CreateTranslation(new Vector3(0, 0, 3));
-                _shader.SetUniform<Matrix4>("model", model);
-
-                _model.Draw(_shader);
+                for (var i = 0; i < _position.Length; i++)
+                {
+                    var model = Matrix4.Identity;
+                    var angle = 20f * i;
+                    model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), angle * (time / 100));
+                    model *= Matrix4.CreateTranslation(_position[i]);
                 
-                // for (var i = 0; i < _position.Length; i++)
-                // {
-                //     var model = Matrix4.Identity;
-                //     var angle = 20f * i;
-                //     model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), angle * (time / 100));
-                //     model *= Matrix4.CreateTranslation(_position[i]);
-                // 
-                //     _shader.SetUniform<Matrix4>("model", model);
-                // 
-                //     _model.Draw(_shader);
-                //     // _mesh.Draw(_shader);
-                // }
+                    _shader.SetUniform<Matrix4>("model", model);
+                
+                    _model.Draw(_shader);
+                }
                 
                 // Light
                 _lightShader.Use();
@@ -264,7 +168,7 @@ namespace OpenTK_Renderer
                 _lightShader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
                 _lightShader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
                 
-                _lightMesh.Draw(_lightShader);
+                _lightModel.Draw(_lightShader);
             }
 
             SwapBuffers();

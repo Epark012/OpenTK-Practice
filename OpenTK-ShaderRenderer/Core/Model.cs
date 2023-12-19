@@ -17,22 +17,13 @@ public class Model : IDisposable
             using (var context = new AssimpContext())
             {
                 context.SetConfig(new NormalSmoothingAngleConfig(66.0f));
-                
-                var logstream = new LogStream(delegate(String msg, String userData) {
-                    Console.WriteLine(msg);
-                });
-                logstream.Attach();
-
-                //Import the model. All configs are set. The model
-                //is imported, loaded into managed memory. Then the unmanaged memory is released, and everything is reset.
-                _raw = context.ImportFile(path, PostProcessSteps.CalculateTangentSpace | PostProcessSteps.JoinIdenticalVertices | PostProcessSteps.SortByPrimitiveType);
+                _raw = context.ImportFile(path, PostProcessSteps.CalculateTangentSpace | PostProcessSteps.JoinIdenticalVertices | PostProcessSteps.SortByPrimitiveType | PostProcessSteps.Triangulate);
                 if (_raw == null)
                 {
                     Dispose();
                     throw new Exception($"Failed to read file : {path}");
                 }
                 
-                //TODO: Load the model data into your own structures
                 ProcessNode(_raw.RootNode, _raw);
             }
         }
@@ -87,7 +78,7 @@ public class Model : IDisposable
             }
         }
 
-        var result = new Mesh(vertice.ToArray(), indices.ToArray(), null); 
+        var result = new Mesh(vertice.ToArray(), indices.ToArray(), Array.Empty<Texture>()); 
         return result;
     }
 

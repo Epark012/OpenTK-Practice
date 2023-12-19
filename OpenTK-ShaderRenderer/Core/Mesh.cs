@@ -10,11 +10,27 @@ public class Mesh
     public Texture[] Textures;
 
     private int _vao, _vbo, _ebo;
+    private Texture[] _defaultTextures;
+
     public Mesh(Vertex[] vertices, uint[] indices, Texture[] textures)
     {
+        _defaultTextures = new[]
+        {
+            Texture.LoadFromFile("Resources/Image/container.png"),
+            Texture.LoadFromFile("Resources/Image/container_specular.png")
+        };
+        
         Vertices = vertices;
         Indices = indices;
-        Textures = textures;
+
+        if (textures.Length == 0)
+        {
+            Textures = _defaultTextures;
+        }
+        else
+        {
+            textures = textures;
+        }
         
         UpdateBuffer();
     }
@@ -33,7 +49,6 @@ public class Mesh
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
         
         // TODO: Need to know why this is not working
-        // GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Length * Vertex.Stride, Vertices.ToArray(), BufferUsageHint.StaticDraw);
         GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Length * Vertex.Stride, Vertices, BufferUsageHint.StaticDraw);
         
         _ebo = GL.GenBuffer();
@@ -51,25 +66,6 @@ public class Mesh
 
         // Clear vertex array
         GL.BindVertexArray(0);
-
-        Console.WriteLine("Vertices");
-        Console.WriteLine("---------------");
-        foreach (var vertex in Vertices)
-        {
-            Console.WriteLine(vertex.Position);
-        }
-        Console.WriteLine("---------------");
-        Console.WriteLine("");
-        Console.WriteLine("");
-        Console.WriteLine("");
-        Console.WriteLine("");
-        Console.WriteLine("Indices");
-        Console.WriteLine("---------------");
-        foreach (var index in Indices)
-        {
-            Console.WriteLine(index);
-        }
-        Console.WriteLine("---------------");
     }
 
     /// <summary>
@@ -78,15 +74,16 @@ public class Mesh
     /// <param name="shader">Shader to use for this mesh</param>
     public void Draw(Shader shader)
     {
+        shader.Use();
         GL.BindVertexArray(_vao);
         
         // Apply texture
-        // var baseUnit = TextureUnit.Texture0;
-        // for (var i = 0; i < Textures.Length; i++)
-        // {
-        //     var texture = Textures[i];
-        //     texture.Use(baseUnit + i);
-        // }
+        var baseUnit = TextureUnit.Texture0;
+        for (var i = 0; i < Textures.Length; i++)
+        {
+            var texture = Textures[i];
+            texture.Use(baseUnit + i);
+        }
 
         // Draw mesh
         GL.DrawElements(PrimitiveType.Triangles, Indices.Length, DrawElementsType.UnsignedInt, 0);
@@ -99,16 +96,9 @@ public class Mesh
 
 public struct Vertex
 {
-    public Vector3? Position;
-    public Vector3? Normal;
-    public Vector2? TexCoord;
-
-    public Vertex(Vector3 pos, Vector3 normal, Vector2 tex)
-    {
-        Position = pos;
-        Normal = normal;
-        TexCoord = tex;
-    }
+    public Vector3 Position;
+    public Vector3 Normal;
+    public Vector2 TexCoord;
 
     public static int Stride => Vector3.SizeInBytes * 2 + Vector2.SizeInBytes;
 }
