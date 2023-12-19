@@ -47,7 +47,7 @@ public class Mesh
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 3 * sizeof(float));
 
         GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 6 * sizeof(float));
+        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Vertex.Stride, 6 * sizeof(float));
 
         // Clear vertex array
         GL.BindVertexArray(0);
