@@ -65,11 +65,22 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoords;
 
+uniform sampler2D texture_diffuse1;
+
 out vec4 outputColor;
 
 vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+
+float near = 0.1; 
+float far  = 100.0; 
+  
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
 
 void main()
 {
@@ -87,7 +98,10 @@ void main()
     // Calculate spot light
     result += CalculateSpotLight(spotLight, norm, FragPos, viewDir);
     
-    outputColor = vec4(result, 1.0);
+    float depth = LinearizeDepth(gl_FragCoord.z) / far;
+    // outputColor = vec4(vec3(depth), 1.0);
+    // outputColor = vec4(result, 1.0);
+    outputColor = texture(texture_diffuse1, TexCoords);
     return;
 }
 

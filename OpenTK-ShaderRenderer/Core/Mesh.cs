@@ -7,29 +7,27 @@ public class Mesh
 {
     public Vertex[] Vertices;
     public uint[] Indices;
-    public Texture[] Textures;
+    public TextureInfo[] Textures;
 
     private int _vao, _vbo, _ebo;
-    private Texture[] _defaultTextures;
+    private TextureInfo[] _defaultTextures;
 
-    public Mesh(Vertex[] vertices, uint[] indices, Texture[] textures)
+    public Mesh(Vertex[] vertices, uint[] indices, TextureInfo[] textures)
     {
-        _defaultTextures = new[]
-        {
-            Texture.LoadFromFile("Resources/Image/container.png"),
-            Texture.LoadFromFile("Resources/Image/container_specular.png")
-        };
-        
         Vertices = vertices;
         Indices = indices;
+        Textures = textures;
 
-        if (textures.Length == 0)
+        var message = "A mesh is created\n" +
+                      $"Vertices count - [{Vertices.Length}]\n" +
+                      $"Indices count - [{Indices.Length}]\n" +
+                      $"Textures count - [{Textures.Length}]";
+
+        Console.WriteLine(message);
+
+        foreach (var textureInfo in textures)
         {
-            Textures = _defaultTextures;
-        }
-        else
-        {
-            textures = textures;
+            Console.WriteLine(textureInfo.Type);
         }
         
         UpdateBuffer();
@@ -63,6 +61,12 @@ public class Mesh
 
         GL.EnableVertexAttribArray(2);
         GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Vertex.Stride, 6 * sizeof(float));
+        
+        GL.EnableVertexAttribArray(3);
+        GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 8 * sizeof(float));
+        
+        GL.EnableVertexAttribArray(4);
+        GL.VertexAttribPointer(4, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 11 * sizeof(float));
 
         // Clear vertex array
         GL.BindVertexArray(0);
@@ -77,12 +81,29 @@ public class Mesh
         shader.Use();
         GL.BindVertexArray(_vao);
         
-        // Apply texture
-        var baseUnit = TextureUnit.Texture0;
-        for (var i = 0; i < Textures.Length; i++)
+        uint diffuseNr = 1;
+        uint specularNr = 1;
+        uint normalNr = 1;
+        uint heightNr = 1;
+        for (int i = 0; i < Textures.Length; i++)
         {
-            var texture = Textures[i];
-            texture.Use(baseUnit + i);
+            // retrieve texture number (the N in diffuse_textureN)
+            var number = "";
+            var type = Textures[i].Type;
+            number = type switch
+            {
+                "texture_diffuse" => diffuseNr++.ToString(),
+                "texture_specular" => specularNr++.ToString(),
+                "texture_normal" => normalNr++.ToString(),
+                "texture_height" => heightNr++.ToString(),
+                _ => number
+            };
+
+            // now set the sampler to the correct texture unit
+            shader.SetUniform(type + number, i);
+
+            GL.ActiveTexture(TextureUnit.Texture0 + i);
+            GL.BindTexture(TextureTarget.Texture2D, Textures[i].Id);
         }
 
         // Draw mesh
@@ -99,6 +120,8 @@ public struct Vertex
     public Vector3 Position;
     public Vector3 Normal;
     public Vector2 TexCoord;
+    public Vector3 Tangent;
+    public Vector3 Bitangent;
 
-    public static int Stride => Vector3.SizeInBytes * 2 + Vector2.SizeInBytes;
+    public static int Stride => Vector3.SizeInBytes * 4 + Vector2.SizeInBytes;
 }

@@ -3,18 +3,31 @@ using StbImageSharp;
 
 namespace OpenTK_Renderer
 {
+    public struct TextureInfo
+    {
+        public uint Id;
+        public string Type;
+        public string Path;
+
+        public override string ToString()
+        {
+            return $"Texture Info\n ID : {Id}\n Type : {Type}\n Path : {Path}";
+        }
+    };
+    
     public class Texture
     {
         public int ID { get; set; }
 
-        public static Texture LoadFromFile(string path)
+        public Texture LoadFromFile(string path)
         {
             // Generate handle
-            int handle = GL.GenTexture();
+            ID = GL.GenTexture();
+            Use();
 
             // Bind the handle
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, handle);
+            GL.BindTexture(TextureTarget.Texture2D, ID);
 
             StbImage.stbi_set_flip_vertically_on_load(1);
 
@@ -33,15 +46,20 @@ namespace OpenTK_Renderer
 
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-            return new Texture(handle);
+            return new Texture(ID);
         }
-
+        
         public Texture(int id)
         {
             ID = id;
         }
 
-        public void Use(TextureUnit unit)
+        public Texture(string path)
+        {
+            LoadFromFile(path);
+        }
+
+        public void Use(TextureUnit unit = TextureUnit.Texture0)
         {
             GL.ActiveTexture(unit);
             GL.BindTexture(TextureTarget.Texture2D, ID);

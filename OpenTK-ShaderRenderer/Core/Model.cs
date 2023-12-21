@@ -8,6 +8,8 @@ public class Model : IDisposable
 {
     public List<Mesh> Meshes = new ();
     private readonly Scene _raw;
+    private List<TextureInfo> _texturesLoaded = new List<TextureInfo>();
+    private string _directory;
 
     public Model(string path)
     {
@@ -24,6 +26,9 @@ public class Model : IDisposable
                     throw new Exception($"Failed to read file : {path}");
                 }
                 
+                var index = path.LastIndexOf("/");
+                _directory = path.Substring(0, index);
+
                 ProcessNode(_raw.RootNode, _raw);
             }
         }
@@ -65,11 +70,16 @@ public class Model : IDisposable
                 ? ImportUtility.FromVector3dto2(mesh.TextureCoordinateChannels[0][i])
                 : Vector2.Zero;
             
+            // Tangents
+            vertex.Tangent = ImportUtility.FromVector3dto3(mesh.Tangents[i]);
+            
+            // BiTangent
+            vertex.Bitangent = ImportUtility.FromVector3dto3(mesh.BiTangents[i]);
             vertice.Add(vertex);
         }
         
         var indices = new List<uint>();
-        for (int i = 0; i < mesh.FaceCount; i++)
+        for (var i = 0; i < mesh.FaceCount; i++)
         {
             var face = mesh.Faces[i];
             for (int j = 0; j < face.IndexCount; j++)
@@ -78,8 +88,26 @@ public class Model : IDisposable
             }
         }
 
-        var result = new Mesh(vertice.ToArray(), indices.ToArray(), Array.Empty<Texture>()); 
-        return result;
+        var textures = new List<TextureInfo>();
+        var material = scene.Materials[mesh.MaterialIndex];
+            
+        // Diffuse maps
+        var diffuseMaps = LoadMaterialTextures(material, TextureType.Diffuse, "texture_diffuse");
+        textures.AddRange(diffuseMaps);
+            
+        // specular maps
+        var specularMaps = LoadMaterialTextures(material, TextureType.Specular, "texture_specular");
+        textures.AddRange(specularMaps);
+            
+        // normal maps
+        var normalMaps = LoadMaterialTextures(material, TextureType.Height, "texture_normal");
+        textures.AddRange(normalMaps);
+            
+        // height maps
+        var heightMaps = LoadMaterialTextures(material, TextureType.Ambient, "texture_height");
+        textures.AddRange(heightMaps);
+        
+        return new Mesh(vertice.ToArray(), indices.ToArray(), textures.ToArray());
     }
 
     public void Draw(Shader shader)
@@ -89,7 +117,49 @@ public class Model : IDisposable
             mesh.Draw(shader);
         }
     }
+    
+    private List<TextureInfo> LoadMaterialTextures(Material mat, TextureType type, string typeName)
+    {
+        List<TextureInfo> textures = new List<TextureInfo>();
+        for (var i = 0; i < mat.GetMaterialTextureCount(type); i++)
+        {
+            TextureSlot str;
+            mat.GetMaterialTexture(type, i, out str);
+            // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
+            var skip = false;
+            for (int j = 0; j < _texturesLoaded.Count; j++)
+            {
+                if (_texturesLoaded[j].Path == str.FilePath)
+                {
+                    textures.Add(_texturesLoaded[j]);
+                    skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                    break;
+                }
+            }
+            if (!skip)
+            {   // if texture hasn't been loaded already, load it
+                Console.WriteLine(str.TextureType + " -- " + str.FilePath + " is loaded");
+                TextureInfo texture;
+                texture.Id = TextureFromFile(str.FilePath, _directory);
+                texture.Type = typeName;
+                texture.Path = str.FilePath;
+                textures.Add(texture);
+                
+                _texturesLoaded.Add(texture);
+            }
+        }
+        
+        return textures;
+    }
+    
+    private uint TextureFromFile(string path, string directory)
+    {
+        var tPath = System.IO.Path.Combine(directory, path);
+        var t = new Texture(tPath);
 
+        return (uint)t.ID;
+    }
+    
     public void Dispose()
     {
         // TODO need to dispose all datas

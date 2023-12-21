@@ -38,8 +38,6 @@ namespace OpenTK_Renderer
         };
         
         private Shader _shader;
-        private Texture _texture;
-        private Texture _texture2;
         private Shader _lightShader;
 
         protected override void OnLoad()
@@ -54,22 +52,20 @@ namespace OpenTK_Renderer
 
             // Enable depth
             GL.Enable(EnableCap.DepthTest);
+            
+            // Default Depth Function
+            GL.DepthFunc(DepthFunction.Less);
+            
+            // Stencil Test
+            GL.Enable(EnableCap.StencilTest);
 
             _shader = new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag");
 
             // Camera
             _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
             CursorState = CursorState.Grabbed;
-            
-            // Create textures
-            _texture = Texture.LoadFromFile("Resources/Image/container.png");
-            _texture2 = Texture.LoadFromFile("Resources/Image/container_specular.png");
-            
-            var texs = new List<Texture>();
-            texs.Add(_texture);
-            texs.Add(_texture2);
-            
-            _model = new Model("Resources/Model/Cube.fbx");
+
+            _model = new Model("Resources/Model/Ship.fbx");
 
             #region Lighting
 
@@ -99,7 +95,7 @@ namespace OpenTK_Renderer
         {
             base.OnRenderFrame(args);
 
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
             {
                 _shader.Use();
@@ -111,7 +107,6 @@ namespace OpenTK_Renderer
 
                 _shader.SetUniform("material.diffuse", 0);
                 _shader.SetUniform("material.specular", 1);
-                // _shader.SetUniform("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
                 _shader.SetUniform("material.shininess", 32.0f);
                     
                 // Directional light
@@ -146,17 +141,24 @@ namespace OpenTK_Renderer
                 
                 float time = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
 
-                for (var i = 0; i < _position.Length; i++)
-                {
-                    var model = Matrix4.Identity;
-                    var angle = 20f * i;
-                    model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), angle * (time / 100));
-                    model *= Matrix4.CreateTranslation(_position[i]);
+                var model = Matrix4.Identity;
+                model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), 20f * (time / 100));
+                model *= Matrix4.CreateTranslation(new  Vector3(0, 0, -10));
                 
-                    _shader.SetUniform<Matrix4>("model", model);
+                _shader.SetUniform<Matrix4>("model", model);
+                _model.Draw(_shader);
                 
-                    _model.Draw(_shader);
-                }
+                // for (var i = 0; i < _position.Length; i++)
+                // {
+                //     var model = Matrix4.Identity;
+                //     var angle = 20f * i;
+                //     model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), angle * (time / 100));
+                //     model *= Matrix4.CreateTranslation(_position[i]);
+                // 
+                //     _shader.SetUniform<Matrix4>("model", model);
+                // 
+                //     _model.Draw(_shader);
+                // }
                 
                 // Light
                 _lightShader.Use();
