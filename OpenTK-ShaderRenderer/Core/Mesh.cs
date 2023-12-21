@@ -10,7 +10,6 @@ public class Mesh
     public TextureInfo[] Textures;
 
     private int _vao, _vbo, _ebo;
-    private TextureInfo[] _defaultTextures;
 
     public Mesh(Vertex[] vertices, uint[] indices, TextureInfo[] textures)
     {
@@ -45,8 +44,6 @@ public class Mesh
         // Vbo
         _vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        
-        // TODO: Need to know why this is not working
         GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Length * Vertex.Stride, Vertices, BufferUsageHint.StaticDraw);
         
         _ebo = GL.GenBuffer();

@@ -100,8 +100,8 @@ void main()
     
     float depth = LinearizeDepth(gl_FragCoord.z) / far;
     // outputColor = vec4(vec3(depth), 1.0);
-    // outputColor = vec4(result, 1.0);
-    outputColor = texture(texture_diffuse1, TexCoords);
+    outputColor = vec4(result, 1.0);
+    // outputColor = texture(texture_diffuse1, TexCoords);
     return;
 }
 

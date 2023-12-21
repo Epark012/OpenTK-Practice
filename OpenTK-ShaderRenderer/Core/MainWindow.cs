@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK_Renderer.Rendering;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -8,12 +9,23 @@ namespace OpenTK_Renderer
 {
     public class MainWindow : GameWindow
     {
-        public MainWindow(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() { Title = title, ClientSize = (width, height) }) { }
+        public MainWindow(int width, int height, string title) : base(new GameWindowSettings(){ UpdateFrequency = 60}, new NativeWindowSettings() { Title = title, ClientSize = (width, height) }) { }
         private readonly Vector4 _initialBackgroundColor = new (0.2f, 0.3f, 0.3f, 1.0f);
 
+        // Camera
         private Camera _camera;
         private bool _firstMove = true;
         private Vector2 _lastPos;
+        
+        // Models
+        private Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
+        private Model _lightModel;
+        private Model _model;
+        private Shader _shader;
+        private Shader _lightShader;
+        
+        // Cube map
+        private CubeMap _cubeMap;
         
         private readonly Vector3[] _position = 
         {
@@ -37,9 +49,16 @@ namespace OpenTK_Renderer
             new Vector3(0.0f, 0.0f, -3.0f)
         };
         
-        private Shader _shader;
-        private Shader _lightShader;
-
+        string[] _defaultCubeMapFaces = new[]
+        {
+            "Resources/Image/CubeMap/right.jpg",
+            "Resources/Image/CubeMap/left.jpg",
+            "Resources/Image/CubeMap/top.jpg",
+            "Resources/Image/CubeMap/bottom.jpg",
+            "Resources/Image/CubeMap/front.jpg",
+            "Resources/Image/CubeMap/back.jpg"
+        };
+        
         protected override void OnLoad()
         {
             base.OnLoad();
@@ -57,7 +76,7 @@ namespace OpenTK_Renderer
             GL.DepthFunc(DepthFunction.Less);
             
             // Stencil Test
-            GL.Enable(EnableCap.StencilTest);
+            // GL.Enable(EnableCap.StencilTest);
 
             _shader = new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag");
 
@@ -73,6 +92,12 @@ namespace OpenTK_Renderer
             _lightModel = new Model("Resources/Model/Cube.fbx");
             
             #endregion
+
+            #region CubeMap
+            
+            _cubeMap = new CubeMap(_defaultCubeMapFaces);
+
+            #endregion
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -85,14 +110,12 @@ namespace OpenTK_Renderer
             // Get the mouse state
             ProcessMouseInput();
         }
-
-        private Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
         
-        private Model _lightModel;
-        private Model _model;
-
         protected override void OnRenderFrame(FrameEventArgs args)
         {
+            Title = $"Running - Vsync: {VSync}) FPS: {1f / args.Time:0}";
+            GL.Viewport(0, 0, Size.X, Size.Y);
+
             base.OnRenderFrame(args);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
@@ -171,6 +194,9 @@ namespace OpenTK_Renderer
                 _lightShader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
                 
                 _lightModel.Draw(_lightShader);
+                
+                // Cubemap
+                _cubeMap.RenderSkybox(_camera.GetViewMatrix(), _camera.GetProjectionMatrix());
             }
 
             SwapBuffers();
