@@ -26,37 +26,13 @@ namespace OpenTK_Renderer
         
         // Cube map
         private CubeMap _cubeMap;
-        
-        private readonly Vector3[] _position = 
-        {
-            new (3.0f, 0.5f, -5.0f),
-            new (2.0f, 5.0f, -15.0f),
-            new (-1.5f, -2.2f, -2.5f),
-            new (-3.8f, -2.0f, -12.3f),
-            new (2.4f, -0.4f, -3.5f),
-            new (-1.7f, 3.0f, -7.5f),
-            new (1.3f, -2.0f, -2.5f),
-            new (1.5f, 2.0f, -2.5f),
-            new (1.5f, 0.2f, -1.5f),
-            new (-1.3f, 1.0f, -1.5f)
-        };
-        
+
         private readonly Vector3[] _pointLightPositions =
         {
             new Vector3(0.7f, 0.2f, 2.0f),
             new Vector3(2.3f, -3.3f, -4.0f),
             new Vector3(-4.0f, 2.0f, -12.0f),
             new Vector3(0.0f, 0.0f, -3.0f)
-        };
-        
-        string[] _defaultCubeMapFaces = new[]
-        {
-            "Resources/Image/CubeMap/right.jpg",
-            "Resources/Image/CubeMap/left.jpg",
-            "Resources/Image/CubeMap/top.jpg",
-            "Resources/Image/CubeMap/bottom.jpg",
-            "Resources/Image/CubeMap/front.jpg",
-            "Resources/Image/CubeMap/back.jpg"
         };
         
         protected override void OnLoad()
@@ -95,7 +71,7 @@ namespace OpenTK_Renderer
 
             #region CubeMap
             
-            _cubeMap = new CubeMap(_defaultCubeMapFaces);
+            _cubeMap = new CubeMap(null);
 
             #endregion
         }
@@ -170,18 +146,6 @@ namespace OpenTK_Renderer
                 
                 _shader.SetUniform<Matrix4>("model", model);
                 _model.Draw(_shader);
-                
-                // for (var i = 0; i < _position.Length; i++)
-                // {
-                //     var model = Matrix4.Identity;
-                //     var angle = 20f * i;
-                //     model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), angle * (time / 100));
-                //     model *= Matrix4.CreateTranslation(_position[i]);
-                // 
-                //     _shader.SetUniform<Matrix4>("model", model);
-                // 
-                //     _model.Draw(_shader);
-                // }
                 
                 // Light
                 _lightShader.Use();
