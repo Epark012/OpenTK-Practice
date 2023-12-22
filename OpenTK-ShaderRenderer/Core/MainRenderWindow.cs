@@ -11,7 +11,7 @@ namespace OpenTK_Renderer
     /// </summary>
     public partial class MainRenderWindow : RenderWindow
     {
-        public MainRenderWindow(int width, int height, string title, int fps = 60) : base(width, height, title, fps) { }
+        public MainRenderWindow(int width, int height, string title, int targetFrame = 60) : base(width, height, title, targetFrame) { }
         
         private readonly Vector4 _initialBackgroundColor = new (0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -74,9 +74,20 @@ namespace OpenTK_Renderer
 
             #region CubeMap
             
-            _cubeMap = new CubeMap(null);
+            InitializeSkybox();
 
             #endregion
+        }
+
+        /// <summary>
+        /// Initialize skybox
+        /// </summary>
+        private void InitializeSkybox()
+        {
+            if (RenderSetting.RenderSkybox)
+                _cubeMap = new CubeMap(null);
+            else
+                Console.WriteLine("Skip initializing skybox following RenderSetting");
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -163,7 +174,8 @@ namespace OpenTK_Renderer
                 _lightModel.Draw(_lightShader);
                 
                 // Cubemap
-                _cubeMap.RenderSkybox(_camera.GetViewMatrix(), _camera.GetProjectionMatrix());
+                if (RenderSetting.RenderSkybox)
+                    _cubeMap.RenderSkybox(_camera.GetViewMatrix(), _camera.GetProjectionMatrix());
             }
 
             SwapBuffers();
