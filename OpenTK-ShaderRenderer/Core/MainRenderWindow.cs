@@ -2,14 +2,17 @@
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace OpenTK_Renderer
 {
-    public class MainWindow : GameWindow
+    /// <summary>
+    /// Partial class for rendering
+    /// </summary>
+    public partial class MainRenderWindow : RenderWindow
     {
-        public MainWindow(int width, int height, string title) : base(new GameWindowSettings(){ UpdateFrequency = 60}, new NativeWindowSettings() { Title = title, ClientSize = (width, height) }) { }
+        public MainRenderWindow(int width, int height, string title, int fps = 60) : base(width, height, title, fps) { }
+        
         private readonly Vector4 _initialBackgroundColor = new (0.2f, 0.3f, 0.3f, 1.0f);
 
         // Camera
@@ -29,10 +32,10 @@ namespace OpenTK_Renderer
 
         private readonly Vector3[] _pointLightPositions =
         {
-            new Vector3(0.7f, 0.2f, 2.0f),
-            new Vector3(2.3f, -3.3f, -4.0f),
-            new Vector3(-4.0f, 2.0f, -12.0f),
-            new Vector3(0.0f, 0.0f, -3.0f)
+            new (0.7f, 0.2f, 2.0f),
+            new (2.3f, -3.3f, -4.0f),
+            new (-4.0f, 2.0f, -12.0f),
+            new (0.0f, 0.0f, -3.0f)
         };
         
         protected override void OnLoad()
@@ -166,78 +169,6 @@ namespace OpenTK_Renderer
             SwapBuffers();
         }
 
-        /// <summary>
-        /// Process Mouse Input
-        /// </summary>
-        private void ProcessMouseInput()
-        {
-            var mouse = MouseState;
-
-            if (_firstMove) // This bool variable is initially set to true.
-            {
-                _lastPos = new Vector2(mouse.X, mouse.Y);
-                _firstMove = false;
-                return;
-            }
-
-            // Calculate the offset of the mouse position
-            var deltaX = mouse.X - _lastPos.X;
-            var deltaY = mouse.Y - _lastPos.Y;
-            _lastPos = new Vector2(mouse.X, mouse.Y);
-
-            // Apply the camera pitch and yaw (we clamp the pitch in the camera class)
-            const float sensitivity = 0.2f;
-
-            _camera.Yaw += deltaX * sensitivity;
-            _camera.Pitch -= deltaY * sensitivity; // Reversed since y-coordinates range from bottom to top
-        }
-        
-        /// <summary>
-        /// Process Keyboard Input
-        /// </summary>
-        private void ProcessKeyboardInput(FrameEventArgs e)
-        {
-            if (!KeyboardState.IsAnyKeyDown)
-            {
-                return;
-            }
-
-            if (KeyboardState.IsKeyDown(Keys.Escape))
-            {
-                Close();
-            }
-
-            var input = KeyboardState;
-
-            const float cameraSpeed = 1.5f;
-
-            if (input.IsKeyDown(Keys.W))
-            {
-                _camera.Position += _camera.Front * cameraSpeed * (float)e.Time; // Forward
-            }
-
-            if (input.IsKeyDown(Keys.S))
-            {
-                _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time; // Backwards
-            }
-            if (input.IsKeyDown(Keys.A))
-            {
-                _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time; // Left
-            }
-            if (input.IsKeyDown(Keys.D))
-            {
-                _camera.Position += _camera.Right * cameraSpeed * (float)e.Time; // Right
-            }
-            if (input.IsKeyDown(Keys.Space))
-            {
-                _camera.Position += _camera.Up * cameraSpeed * (float)e.Time; // Up
-            }
-            if (input.IsKeyDown(Keys.LeftShift))
-            {
-                _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
-            }
-        }
-        
         /// <summary>
         /// Callback for resizing window
         /// </summary>

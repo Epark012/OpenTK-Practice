@@ -184,6 +184,7 @@ public class CubeMap : IDisposable
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.TextureCubeMap, id);
         
+        // cube texture is drawn on different uv layout
         StbImage.stbi_set_flip_vertically_on_load(0);
 
         for (var i = 0; i < paths.Length; i++)
