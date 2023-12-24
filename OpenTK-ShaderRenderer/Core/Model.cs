@@ -8,7 +8,7 @@ public class Model : IDisposable
 {
     public List<Mesh> Meshes = new ();
     
-    private readonly Scene _raw;
+    private readonly Assimp.Scene _raw;
     private List<TextureInfo> _texturesLoaded = new List<TextureInfo>();
     private readonly string _directory;
     private Matrix4 ModelMatrix = Matrix4.Identity;
@@ -42,7 +42,7 @@ public class Model : IDisposable
         ModelMatrix = ImportUtility.FromMatrix4dto4(_raw.RootNode.Transform);
     }
 
-    private void ProcessNode(Node node, Scene scene)
+    private void ProcessNode(Node node, Assimp.Scene scene)
     {
         for (int i = 0; i < node.MeshCount; i++)
         {
@@ -56,7 +56,7 @@ public class Model : IDisposable
         }
     }
 
-    private Mesh ProcessMesh(Assimp.Mesh mesh, Scene scene)
+    private Mesh ProcessMesh(Assimp.Mesh mesh, Assimp.Scene scene)
     {
         var vertice = new List<Vertex>();
         for (int i = 0; i < mesh.VertexCount; i++)

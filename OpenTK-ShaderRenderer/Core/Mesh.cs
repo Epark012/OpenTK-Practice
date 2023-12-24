@@ -5,30 +5,24 @@ namespace OpenTK_Renderer;
 
 public class Mesh
 {
-    public Vertex[] Vertices;
-    public uint[] Indices;
-    public TextureInfo[] Textures;
+    private readonly Vertex[] _vertices;
+    private readonly uint[] _indices;
+    private readonly TextureInfo[] _textures;
 
     private int _vao, _vbo, _ebo;
 
     public Mesh(Vertex[] vertices, uint[] indices, TextureInfo[] textures)
     {
-        Vertices = vertices;
-        Indices = indices;
-        Textures = textures;
+        _vertices = vertices;
+        _indices = indices;
+        _textures = textures;
 
         var message = "A mesh is created\n" +
-                      $"Vertices count - [{Vertices.Length}]\n" +
-                      $"Indices count - [{Indices.Length}]\n" +
-                      $"Textures count - [{Textures.Length}]";
+                      $"Vertices count - [{_vertices.Length}]\n" +
+                      $"Indices count - [{_indices.Length}]\n" +
+                      $"Textures count - [{_textures.Length}]";
 
         Console.WriteLine(message);
-
-        foreach (var textureInfo in textures)
-        {
-            Console.WriteLine(textureInfo.Type);
-        }
-        
         UpdateBuffer();
     }
 
@@ -44,11 +38,11 @@ public class Mesh
         // Vbo
         _vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Length * Vertex.Stride, Vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * Vertex.Stride, _vertices, BufferUsageHint.StaticDraw);
         
         _ebo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, Indices.Length * sizeof(uint), Indices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Vertex.Stride, 0);
@@ -82,11 +76,11 @@ public class Mesh
         uint specularNr = 1;
         uint normalNr = 1;
         uint heightNr = 1;
-        for (int i = 0; i < Textures.Length; i++)
+        for (int i = 0; i < _textures.Length; i++)
         {
             // retrieve texture number (the N in diffuse_textureN)
             var number = "";
-            var type = Textures[i].Type;
+            var type = _textures[i].Type;
             number = type switch
             {
                 "texture_diffuse" => diffuseNr++.ToString(),
@@ -100,11 +94,11 @@ public class Mesh
             shader.SetUniform(type + number, i);
 
             GL.ActiveTexture(TextureUnit.Texture0 + i);
-            GL.BindTexture(TextureTarget.Texture2D, Textures[i].Id);
+            GL.BindTexture(TextureTarget.Texture2D, _textures[i].Id);
         }
 
         // Draw mesh
-        GL.DrawElements(PrimitiveType.Triangles, Indices.Length, DrawElementsType.UnsignedInt, 0);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         
         // Clear binding texture to default
         GL.BindVertexArray(0);

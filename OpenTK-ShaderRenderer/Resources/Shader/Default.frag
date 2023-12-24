@@ -98,10 +98,7 @@ void main()
     // Calculate spot light
     result += CalculateSpotLight(spotLight, norm, FragPos, viewDir);
     
-    float depth = LinearizeDepth(gl_FragCoord.z) / far;
-    // outputColor = vec4(vec3(depth), 1.0);
     outputColor = vec4(result, 1.0);
-    // outputColor = texture(texture_diffuse1, TexCoords);
     return;
 }
 

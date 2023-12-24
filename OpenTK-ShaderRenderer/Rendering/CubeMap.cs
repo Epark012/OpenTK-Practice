@@ -103,20 +103,8 @@ public class CubeMap : IDisposable
     private Shader _cubeMapShader;
     private Shader _skyboxShader;
 
-    string[] _defaultCubeMapFaces = new[]
+    public CubeMap(string[] paths)
     {
-        "Resources/Image/CubeMap/right.jpg",
-        "Resources/Image/CubeMap/left.jpg",
-        "Resources/Image/CubeMap/top.jpg",
-        "Resources/Image/CubeMap/bottom.jpg",
-        "Resources/Image/CubeMap/front.jpg",
-        "Resources/Image/CubeMap/back.jpg"
-    };
-    
-    public CubeMap(string[]? paths)
-    {
-        paths ??= _defaultCubeMapFaces;
-        
         // Initialize shaders and buffers
         Initialize();
 

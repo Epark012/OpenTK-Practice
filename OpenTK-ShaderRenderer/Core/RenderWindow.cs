@@ -23,4 +23,10 @@ public struct RenderSetting
     {
         RenderSkybox = true;
     }
+
+    public string[] DefaultCubeMap = new[]
+    {
+        "Resources/Image/CubeMap/right.jpg", "Resources/Image/CubeMap/left.jpg", "Resources/Image/CubeMap/top.jpg",
+        "Resources/Image/CubeMap/bottom.jpg", "Resources/Image/CubeMap/front.jpg", "Resources/Image/CubeMap/back.jpg"
+    };
 }
