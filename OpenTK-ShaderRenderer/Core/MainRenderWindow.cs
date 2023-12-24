@@ -1,5 +1,4 @@
-﻿using OpenTK_Renderer.Rendering;
-using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 
@@ -14,29 +13,15 @@ namespace OpenTK_Renderer
     {
         public MainRenderWindow(int width, int height, string title, int targetFrame = 60) : base(width, height, title, targetFrame) { }
         
-        private readonly Vector4 _initialBackgroundColor = new (0.2f, 0.3f, 0.3f, 1.0f);
         private Scene _scene;
-        
-        // Models
-        private Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
-        private Model _lightModel;
-        private Shader _lightShader;
-        
-        // Cube map
-        private CubeMap _cubeMap;
-
         private Camera _camera;
         
         protected override void OnLoad()
         {
             base.OnLoad();
 
-            // Clear background 
-            GL.ClearColor(_initialBackgroundColor.X,
-                          _initialBackgroundColor.Y,
-                          _initialBackgroundColor.Z,
-                          _initialBackgroundColor.W);
-
+            // TODO setting by mask
+            
             // Enable depth
             GL.Enable(EnableCap.DepthTest);
             
@@ -50,22 +35,23 @@ namespace OpenTK_Renderer
             _scene = new Scene( RenderSetting, 
                     new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y), 
                     null, 
-            new Object(new Model("Resources/Model/Ship.fbx"), new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag")));
+            new Object(new Model("Resources/Model/Ship.fbx"), new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag"),
+                obj =>
+                {
+                    obj.Model.Translate(new Vector3(0,0, -5));
+                }),
+                    new Object(new Model("Resources/Model/Cube.fbx"), new Shader("Resources/Shader/Light.vert", "Resources/Shader/Light.frag"),
+                        obj =>
+                        {
+                            obj.Model.Scale(0.2f);
+                            obj.Model.Translate(new Vector3(1.2f, 1.0f, 2.0f));
+                        }));
 
             _scene.Initialize();
             
             // Initialize fields
             _camera = _scene.Camera;
             CursorState = CursorState.Grabbed;
-
-            {
-                #region Lighting
-                
-                _lightShader = new Shader("Resources/Shader/Light.vert", "Resources/Shader/Light.frag");
-                _lightModel = new Model("Resources/Model/Cube.fbx");
-                
-                #endregion
-            }
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -90,17 +76,6 @@ namespace OpenTK_Renderer
 
             {
                 _scene.Render();
-                
-                // Light
-                _lightShader.Use();
-
-                var lightModel = Matrix4.Identity * Matrix4.CreateTranslation(lightPos);
-                lightModel *= Matrix4.CreateScale(0.2f);
-                
-                _lightShader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
-                _lightShader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
-                
-                _lightModel.Draw(_lightShader, lightModel);
             }
 
             SwapBuffers();

@@ -6,7 +6,7 @@ namespace OpenTK_Renderer;
 
 public class Model : IDisposable
 {
-    public List<Mesh> Meshes = new ();
+    private readonly List<Mesh> _meshes = new ();
     
     private readonly Assimp.Scene _raw;
     private List<TextureInfo> _texturesLoaded = new List<TextureInfo>();
@@ -47,7 +47,7 @@ public class Model : IDisposable
         for (int i = 0; i < node.MeshCount; i++)
         {
             var mesh = scene.Meshes[i];
-            Meshes.Add(ProcessMesh(mesh, scene));
+            _meshes.Add(ProcessMesh(mesh, scene));
         }
 
         for (int i = 0; i < node.ChildCount; i++)
@@ -129,7 +129,7 @@ public class Model : IDisposable
     {
         shader.SetUniform("model", model);
         
-        foreach (var mesh in Meshes)
+        foreach (var mesh in _meshes)
         {
             mesh.Draw(shader);
         }
@@ -176,11 +176,29 @@ public class Model : IDisposable
 
         return (uint)t.ID;
     }
-    
+
+    /// <summary>
+    /// Scale model matrix 
+    /// </summary>
+    /// <param name="value">Scale value</param>
+    public void Scale(float value)
+    {
+        ModelMatrix *= Matrix4.CreateScale(value);
+    }
+
+    /// <summary>
+    /// Translate model matrix
+    /// </summary>
+    /// <param name="position">Translation value</param>
+    public void Translate(Vector3 position)
+    {
+        ModelMatrix *= Matrix4.CreateTranslation(position);
+    }
+
     public void Dispose()
     {
         // TODO need to dispose all datas
-        Meshes.Clear();
+        _meshes.Clear();
         GC.SuppressFinalize(this);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using OpenTK_Renderer.Rendering;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace OpenTK_Renderer;
@@ -20,7 +21,6 @@ public class Scene
         new (-4.0f, 2.0f, -12.0f),
         new (0.0f, 0.0f, -3.0f)
     };
-
     
     #region Cache
 
@@ -43,9 +43,13 @@ public class Scene
     public void Initialize()
     {
         // Initialize cube map
-        if (_renderSetting.RenderSkybox && _cubeMap == null)
+        if (_renderSetting.RenderSkybox)
         {
-            _cubeMap = new CubeMap(_renderSetting.DefaultCubeMap);
+            _cubeMap ??= new CubeMap(_renderSetting.DefaultCubeMapPath);
+        }
+        else
+        {
+            GL.ClearColor(_renderSetting.DefaultBackGroundColor);
         }
         
         // Initialize objects
