@@ -6,6 +6,8 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace OpenTK_Renderer
 {
+    // TODO: Create Transform and Scene to control. If have time, set the scene for shader map using Imgui.net
+    
     /// <summary>
     /// Partial class for rendering
     /// </summary>
@@ -152,14 +154,13 @@ namespace OpenTK_Renderer
                 _shader.SetUniform("spotLight.cutOff", MathF.Cos(MathHelper.DegreesToRadians(12.5f)));
                 _shader.SetUniform("spotLight.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(17.5f)));
                 
-                float time = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
+                var time = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
 
                 var model = Matrix4.Identity;
                 model *= Matrix4.CreateFromAxisAngle(new Vector3(1.0f , 0.3f, 0.5f), 20f * (time / 100));
                 model *= Matrix4.CreateTranslation(new  Vector3(0, 0, -10));
                 
-                _shader.SetUniform<Matrix4>("model", model);
-                _model.Draw(_shader);
+                _model.Draw(_shader, model);
                 
                 // Light
                 _lightShader.Use();
@@ -167,11 +168,10 @@ namespace OpenTK_Renderer
                 var lightModel = Matrix4.Identity * Matrix4.CreateTranslation(lightPos);
                 lightModel *= Matrix4.CreateScale(0.2f);
                 
-                _lightShader.SetUniform<Matrix4>("model", lightModel);
                 _lightShader.SetUniform<Matrix4>("view", _camera.GetViewMatrix());
                 _lightShader.SetUniform<Matrix4>("projection", _camera.GetProjectionMatrix());
                 
-                _lightModel.Draw(_lightShader);
+                _lightModel.Draw(_lightShader, lightModel);
                 
                 // Cubemap
                 if (RenderSetting.RenderSkybox)

@@ -18,11 +18,21 @@ namespace OpenTK_Renderer
 
             // Vertex 
             source = LoadSource(vertexPath);
+            if (string.IsNullOrEmpty(source))
+            {
+                throw new Exception($"Failed to load shader source : {vertexPath}");
+            }
+            
             var vertex = CreateShader(source, ShaderType.VertexShader);
             GL.AttachShader(ID, vertex);
 
             // Fragment
             source = LoadSource(fragPath);
+            if (string.IsNullOrEmpty(source))
+            {
+                throw new Exception($"Failed to load shader source : {fragPath}");
+            }
+            
             var fragment = CreateShader(source, ShaderType.FragmentShader);
             GL.AttachShader(ID, fragment);
 
@@ -91,9 +101,9 @@ namespace OpenTK_Renderer
                     source = reader.ReadToEnd();
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw new Exception($"Failed to load a shader source at {path}");
+                throw new Exception($"Failed to load a shader source at {path}\n {e.Message}");
             }
 
             return source;

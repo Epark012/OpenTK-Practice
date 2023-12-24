@@ -7,9 +7,11 @@ namespace OpenTK_Renderer;
 public class Model : IDisposable
 {
     public List<Mesh> Meshes = new ();
+    
     private readonly Scene _raw;
     private List<TextureInfo> _texturesLoaded = new List<TextureInfo>();
-    private string _directory;
+    private readonly string _directory;
+    private Matrix4 ModelMatrix = Matrix4.Identity;
 
     public Model(string path)
     {
@@ -36,6 +38,8 @@ public class Model : IDisposable
         {
             throw new Exception("failed to read file: " + path + " (" + e.Message + ")");
         }
+
+        ModelMatrix = ImportUtility.FromMatrix4dto4(_raw.RootNode.Transform);
     }
 
     private void ProcessNode(Node node, Scene scene)
@@ -110,8 +114,21 @@ public class Model : IDisposable
         return new Mesh(vertice.ToArray(), indices.ToArray(), textures.ToArray());
     }
 
-    public void Draw(Shader shader)
+    /// <summary>
+    /// Draw this model at Model matrix;
+    /// </summary>
+    /// <param name="shader">Shader program for this model</param>
+    public void Draw(Shader shader) => Draw(shader, ModelMatrix);
+
+    /// <summary>
+    /// Draw this model at 
+    /// </summary>
+    /// <param name="shader">Shader program for this model</param>
+    /// <param name="model">Model Matrix to transform this model</param>
+    public void Draw(Shader shader, Matrix4 model)
     {
+        shader.SetUniform("model", model);
+        
         foreach (var mesh in Meshes)
         {
             mesh.Draw(shader);
