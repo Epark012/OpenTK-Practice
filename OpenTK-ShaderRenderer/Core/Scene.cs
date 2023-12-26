@@ -26,15 +26,17 @@ public class Scene
 
     private Matrix4 _view = Matrix4.Identity;
     private Matrix4 _projection = Matrix4.Identity;
+    private readonly Action<Scene> _onInitialized;
 
     #endregion
     
-    public Scene(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap, params Object[] models)
+    public Scene(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap, Action<Scene>? onInitialized = null, params Object[] models)
     {
         _renderSetting = renderSetting;
         Camera = camera;
         _cubeMap = cubeMap;
         _objects = models.ToList();
+        _onInitialized = onInitialized;
     }
 
     /// <summary>
@@ -42,6 +44,12 @@ public class Scene
     /// </summary>
     public void Initialize()
     {
+        // Initialize objects
+        foreach (var obj in _objects)
+        {
+            obj.Initialize(_pointLightPositions);
+        }
+        
         // Initialize cube map
         if (_renderSetting.RenderSkybox)
         {
@@ -52,10 +60,19 @@ public class Scene
             GL.ClearColor(_renderSetting.DefaultBackGroundColor);
         }
         
-        // Initialize objects
+        _onInitialized?.Invoke(this);
+    }
+
+    /// <summary>
+    /// Update this scene
+    /// </summary>
+    public void Update()
+    {
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
         foreach (var obj in _objects)
         {
-            obj.Initialize(_pointLightPositions);
+            obj.Update();
         }
     }
     
@@ -70,6 +87,7 @@ public class Scene
 
         foreach (var obj in _objects)
         {
+            // Draw objects
             obj.Render(Camera, _view, _projection);
         }
 

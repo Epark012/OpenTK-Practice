@@ -6,17 +6,21 @@ public class Object
 {
     public Model Model;
     public Shader Shader;
+    private readonly Action<Object>? _onInitialized;
 
     public Object(Model model, Shader shader, Action<Object>? onInitialized = null)
     {
         Model = model;
         Shader = shader;
 
-        onInitialized?.Invoke(this);
+        _onInitialized = onInitialized;
     }
 
     public void Initialize(Vector3[] pointLights)
     {
+            // Create shdaers
+            Shader.Initialize();
+        
             Shader.SetUniform("material.diffuse", 0);
             Shader.SetUniform("material.specular", 1);
             Shader.SetUniform("material.shininess", 32.0f);
@@ -48,8 +52,15 @@ public class Object
             Shader.SetUniform("spotLight.quadratic", 0.032f);
             Shader.SetUniform("spotLight.cutOff", MathF.Cos(MathHelper.DegreesToRadians(12.5f)));
             Shader.SetUniform("spotLight.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(17.5f)));
+            
+            _onInitialized?.Invoke(this);
     }
 
+    public void Update()
+    {
+        // Set runtime light uniforms
+    }
+    
     public void Render(Camera camera, Matrix4 view, Matrix4 projection)
     {
         // TODO Set runtime lighting

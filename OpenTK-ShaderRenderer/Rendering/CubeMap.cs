@@ -158,12 +158,14 @@ public class CubeMap : IDisposable
         _cubeMapShader = new Shader("Resources/Shader/CubeMap.vert", "Resources/Shader/CubeMap.frag");
         _skyboxShader = new Shader("Resources/Shader/Skybox.vert", "Resources/Shader/Skybox.frag");
 
+        _cubeMapShader.Initialize();
+        _skyboxShader.Initialize();
+        
         _cubeMapShader.Use();
         _cubeMapShader.SetUniform("skybox", 0);
 
         _skyboxShader.Use();
         _skyboxShader.SetUniform("skybox", 0);
-
     }
 
     private int LoadCubemapTexture(string[] paths)

@@ -4,8 +4,7 @@ using OpenTK.Windowing.Common;
 
 namespace OpenTK_Renderer
 {
-    // TODO: Create Transform and Scene to control. If have time, set the scene for shader map using Imgui.net
-    
+    // TODO Create light classes and use ImguiNet    
     /// <summary>
     /// Partial class for rendering
     /// </summary>
@@ -34,12 +33,14 @@ namespace OpenTK_Renderer
             // Initialize scene
             _scene = new Scene( RenderSetting, 
                     new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y), 
-                    null, 
+                    null,
+                    null,
             new Object(new Model("Resources/Model/Ship.fbx"), new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag"),
-                obj =>
-                {
-                    obj.Model.Translate(new Vector3(0,0, -5));
-                }),
+                     obj =>
+                    {
+                        obj.Model.Rotate(new Vector3(0, 1,1), 30);
+                        obj.Model.Translate(new Vector3(0,0, -5));
+                    }),
                     new Object(new Model("Resources/Model/Cube.fbx"), new Shader("Resources/Shader/Light.vert", "Resources/Shader/Light.frag"),
                         obj =>
                         {
@@ -71,10 +72,9 @@ namespace OpenTK_Renderer
             GL.Viewport(0, 0, Size.X, Size.Y);
 
             base.OnRenderFrame(args);
-
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-
+            
             {
+                _scene.Update();
                 _scene.Render();
             }
 

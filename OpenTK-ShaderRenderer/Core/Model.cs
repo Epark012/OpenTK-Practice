@@ -135,9 +135,9 @@ public class Model : IDisposable
         }
     }
     
-    private List<TextureInfo> LoadMaterialTextures(Material mat, TextureType type, string typeName)
+    private IEnumerable<TextureInfo> LoadMaterialTextures(Material mat, TextureType type, string typeName)
     {
-        List<TextureInfo> textures = new List<TextureInfo>();
+        var textures = new List<TextureInfo>();
         for (var i = 0; i < mat.GetMaterialTextureCount(type); i++)
         {
             TextureSlot str;
@@ -193,6 +193,16 @@ public class Model : IDisposable
     public void Translate(Vector3 position)
     {
         ModelMatrix *= Matrix4.CreateTranslation(position);
+    }
+
+    /// <summary>
+    /// Rotate model matrix
+    /// </summary>
+    /// <param name="axis">Axis to rotate</param>
+    /// <param name="angle">Angle to rotate</param>
+    public void Rotate(Vector3 axis, float angle)
+    {
+        ModelMatrix*= Matrix4.CreateFromAxisAngle(axis, angle);
     }
 
     public void Dispose()

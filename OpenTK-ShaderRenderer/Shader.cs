@@ -8,29 +8,38 @@ namespace OpenTK_Renderer
         public int ID { get; internal set; }
 
         private Dictionary<string, int> _uniformLocation;
-
+        private bool _isInitialized;
+        
+        private readonly string _vertexPath;
+        private readonly string _fragmentPath;
+        
+        // TODO: Make exception for shader, or log library
         public Shader(string vertexPath, string fragPath)
+        {
+            _vertexPath = vertexPath;
+            _fragmentPath = fragPath;
+        }
+        
+        public void Initialize()
         {
             // Create id for shader program
             ID = GL.CreateProgram();
 
-            string source;
-
-            // Vertex 
-            source = LoadSource(vertexPath);
+            // Vertex
+            var source = LoadSource(_vertexPath);
             if (string.IsNullOrEmpty(source))
             {
-                throw new Exception($"Failed to load shader source : {vertexPath}");
+                throw new Exception($"Failed to load shader source : {_vertexPath}");
             }
             
             var vertex = CreateShader(source, ShaderType.VertexShader);
             GL.AttachShader(ID, vertex);
 
             // Fragment
-            source = LoadSource(fragPath);
+            source = LoadSource(_fragmentPath);
             if (string.IsNullOrEmpty(source))
             {
-                throw new Exception($"Failed to load shader source : {fragPath}");
+                throw new Exception($"Failed to load shader source : {_fragmentPath}");
             }
             
             var fragment = CreateShader(source, ShaderType.FragmentShader);
@@ -44,6 +53,8 @@ namespace OpenTK_Renderer
                 GL.GetProgramInfoLog(ID, out var log);
                 throw new Exception($"Failed to link shader : {log}");
             }
+
+            _isInitialized = true;
 
             // Clear
             GL.DeleteShader(vertex);
@@ -82,6 +93,11 @@ namespace OpenTK_Renderer
 
         public void Use()
         {
+            if (!_isInitialized)
+            {
+                Console.WriteLine($"Shader {ID} is not initialized, wrong access to use this shader");
+            }
+            
             GL.UseProgram(ID);
         }
 
@@ -90,7 +106,7 @@ namespace OpenTK_Renderer
         /// </summary>
         /// <param name="path">Shader path</param>
         /// <returns>Shader source</returns>
-        public static string LoadSource(string path)
+        private static string LoadSource(string path)
         {
             var source = String.Empty;
 
@@ -111,6 +127,7 @@ namespace OpenTK_Renderer
 
         public void Dispose()
         {
+            _isInitialized = false;
             GL.DeleteProgram(ID);
             GC.SuppressFinalize(this);
         }
