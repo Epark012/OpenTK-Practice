@@ -2,7 +2,7 @@
 
 namespace OpenTK_Renderer.Rendering.Lighting;
 
-public class SpotLight
+public class SpotLight : Light
 {
     public Vector3 Ambient;
     public Vector3 Diffuse;
@@ -27,5 +27,10 @@ public class SpotLight
         
         CutOff = cutOff;
         OuterCutOff = outerCutOff;
+    }
+
+    public override void Update()
+    {
+        // Update for dynamic lighting
     }
 }

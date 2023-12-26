@@ -10,6 +10,7 @@ public class Object
     public Shader Shader;
     private Material _material;
     private readonly Action<Object>? _onInitialized;
+    private List<Light> _appliedLights = new ();
 
     public Object(Model model, Shader shader, Action<Object>? onInitialized = null)
     {
@@ -52,6 +53,8 @@ public class Object
         Shader.SetUniform("dirLight.ambient", light.Ambient);
         Shader.SetUniform("dirLight.diffuse", light.Diffuse);
         Shader.SetUniform("dirLight.specular",light.Specular);
+        
+        _appliedLights.Add(light);
     }
     
     private void SetPointLights(PointLight[] pointLights)
@@ -65,6 +68,8 @@ public class Object
             Shader.SetUniform($"pointLights[{i}].constant", 1.0f);
             Shader.SetUniform($"pointLights[{i}].linear", 0.09f);
             Shader.SetUniform($"pointLights[{i}].quadratic", 0.032f);
+            
+            _appliedLights.Add(pointLights[i]);
         }
     }
 
@@ -78,11 +83,17 @@ public class Object
         Shader.SetUniform("spotLight.quadratic", spotLight.Quadratic);
         Shader.SetUniform("spotLight.cutOff", spotLight.CutOff);
         Shader.SetUniform("spotLight.outerCutOff", spotLight.OuterCutOff);
+        
+        _appliedLights.Add(spotLight);
     }
 
     public void Update()
     {
         // Set runtime light uniforms
+        foreach (var appliedLight in _appliedLights)
+        {
+            appliedLight.Update();
+        }
     }
     
     public void Render(Camera camera, Matrix4 view, Matrix4 projection)

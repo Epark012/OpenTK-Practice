@@ -2,7 +2,7 @@
 
 namespace OpenTK_Renderer.Rendering.Lighting;
 
-public class PointLight
+public class PointLight : Light
 {
     private Vector3 _position;
     private Vector3 _ambient;
@@ -23,5 +23,10 @@ public class PointLight
         _constant = constant;
         _linear = linear;
         _quadratic = quadratic;
+    }
+
+    public override void Update()
+    {
+        // Update for dynamic lighting
     }
 }

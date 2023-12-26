@@ -2,7 +2,7 @@
 
 namespace OpenTK_Renderer.Rendering.Lighting;
 
-public class DirectionalLight
+public class DirectionalLight : Light
 {
     public Vector3 Direction;
     public Vector3 Ambient;
@@ -15,5 +15,9 @@ public class DirectionalLight
         Ambient = ambient;
         Diffuse = diffuse;
         Specular = specular;
+    }
+    public override void Update()
+    {
+        // Update for dynamic lighting
     }
 }

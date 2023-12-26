@@ -3,6 +3,16 @@ using System.Text;
 
 namespace OpenTK_Renderer
 {
+    /// <summary>
+    /// Info struct for shader initialization
+    /// </summary>
+    public struct ShaderInfo
+    {
+        public int DirLightCount;
+        public int SpotLightCount;
+        public int PointLightCount;
+    }
+    
     public class Shader : IDisposable
     {
         public int ID { get; internal set; }
