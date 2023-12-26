@@ -1,4 +1,6 @@
-﻿using OpenTK.Mathematics;
+﻿using OpenTK_Renderer.Rendering;
+using OpenTK_Renderer.Rendering.Lighting;
+using OpenTK.Mathematics;
 
 namespace OpenTK_Renderer;
 
@@ -6,6 +8,7 @@ public class Object
 {
     public Model Model;
     public Shader Shader;
+    private Material _material;
     private readonly Action<Object>? _onInitialized;
 
     public Object(Model model, Shader shader, Action<Object>? onInitialized = null)
@@ -15,45 +18,66 @@ public class Object
 
         _onInitialized = onInitialized;
     }
-
-    public void Initialize(Vector3[] pointLights)
+    public void Initialize(DirectionalLight dirLight, SpotLight spotLight, PointLight[] pointLights)
     {
-            // Create shdaers
+            // Create shaders
             Shader.Initialize();
-        
-            Shader.SetUniform("material.diffuse", 0);
-            Shader.SetUniform("material.specular", 1);
-            Shader.SetUniform("material.shininess", 32.0f);
-                
+
+            // Set material
+            _material = new Material(0, 1, 32.0f);
+            SetMaterial(_material);
+            
             // Directional light
-            Shader.SetUniform("dirLight.direction", new Vector3(-0.2f, -1.0f, -0.3f));
-            Shader.SetUniform("dirLight.ambient", new Vector3(0.05f, 0.05f, 0.05f));
-            Shader.SetUniform("dirLight.diffuse", new Vector3(0.4f, 0.4f, 0.4f));
-            Shader.SetUniform("dirLight.specular", new Vector3(0.5f, 0.5f, 0.5f));
-            
-            // Point lights
-            for (var i = 0; i < pointLights.Length; i++)
-            {
-                Shader.SetUniform($"pointLights[{i}].position", pointLights[i]);
-                Shader.SetUniform($"pointLights[{i}].ambient", new Vector3(0.05f, 0.05f, 0.05f));
-                Shader.SetUniform($"pointLights[{i}].diffuse", new Vector3(0.8f, 0.8f, 0.8f));
-                Shader.SetUniform($"pointLights[{i}].specular", new Vector3(1.0f, 1.0f, 1.0f));
-                Shader.SetUniform($"pointLights[{i}].constant", 1.0f);
-                Shader.SetUniform($"pointLights[{i}].linear", 0.09f);
-                Shader.SetUniform($"pointLights[{i}].quadratic", 0.032f);
-            }
-            
+            SetDirLight(dirLight);
+
             // Spot light
-            Shader.SetUniform("spotLight.ambient", new Vector3(0.0f, 0.0f, 0.0f));
-            Shader.SetUniform("spotLight.diffuse", new Vector3(1.0f, 1.0f, 1.0f));
-            Shader.SetUniform("spotLight.specular", new Vector3(1.0f, 1.0f, 1.0f));
-            Shader.SetUniform("spotLight.constant", 1.0f);
-            Shader.SetUniform("spotLight.linear", 0.09f);
-            Shader.SetUniform("spotLight.quadratic", 0.032f);
-            Shader.SetUniform("spotLight.cutOff", MathF.Cos(MathHelper.DegreesToRadians(12.5f)));
-            Shader.SetUniform("spotLight.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(17.5f)));
-            
+            SetSpotLight(spotLight);
+                
+            // Point lights
+            SetPointLights(pointLights);
+
             _onInitialized?.Invoke(this);
+    }
+
+    private void SetMaterial(Material material)
+    {
+        Shader.SetUniform("material.diffuse", material.Diffuse);
+        Shader.SetUniform("material.specular", material.Specular);
+        Shader.SetUniform("material.shininess", material.Shininess);    
+    }
+
+    private void SetDirLight(DirectionalLight light)
+    {
+        Shader.SetUniform("dirLight.direction", light.Direction);
+        Shader.SetUniform("dirLight.ambient", light.Ambient);
+        Shader.SetUniform("dirLight.diffuse", light.Diffuse);
+        Shader.SetUniform("dirLight.specular",light.Specular);
+    }
+    
+    private void SetPointLights(PointLight[] pointLights)
+    {
+        for (var i = 0; i < pointLights.Length; i++)
+        {
+            Shader.SetUniform($"pointLights[{i}].position", pointLights[i]);
+            Shader.SetUniform($"pointLights[{i}].ambient", new Vector3(0.05f, 0.05f, 0.05f));
+            Shader.SetUniform($"pointLights[{i}].diffuse", new Vector3(0.8f, 0.8f, 0.8f));
+            Shader.SetUniform($"pointLights[{i}].specular", new Vector3(1.0f, 1.0f, 1.0f));
+            Shader.SetUniform($"pointLights[{i}].constant", 1.0f);
+            Shader.SetUniform($"pointLights[{i}].linear", 0.09f);
+            Shader.SetUniform($"pointLights[{i}].quadratic", 0.032f);
+        }
+    }
+
+    private void SetSpotLight(SpotLight spotLight)
+    {
+        Shader.SetUniform("spotLight.ambient",  spotLight.Ambient);
+        Shader.SetUniform("spotLight.diffuse",  spotLight.Diffuse);
+        Shader.SetUniform("spotLight.specular", spotLight.Specular);
+        Shader.SetUniform("spotLight.constant", spotLight.Constant);
+        Shader.SetUniform("spotLight.linear", spotLight.Linear);
+        Shader.SetUniform("spotLight.quadratic", spotLight.Quadratic);
+        Shader.SetUniform("spotLight.cutOff", spotLight.CutOff);
+        Shader.SetUniform("spotLight.outerCutOff", spotLight.OuterCutOff);
     }
 
     public void Update()

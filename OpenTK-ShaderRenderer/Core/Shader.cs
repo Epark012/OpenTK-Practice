@@ -78,7 +78,7 @@ namespace OpenTK_Renderer
 
             return shaderId;
         }
-
+        
         private void GetUniforms()
         {
             GL.GetProgram(ID, GetProgramParameterName.ActiveUniforms, out var activeUniformCount);
