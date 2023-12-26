@@ -103,20 +103,8 @@ public class CubeMap : IDisposable
     private Shader _cubeMapShader;
     private Shader _skyboxShader;
 
-    string[] _defaultCubeMapFaces = new[]
+    public CubeMap(string[] paths)
     {
-        "Resources/Image/CubeMap/right.jpg",
-        "Resources/Image/CubeMap/left.jpg",
-        "Resources/Image/CubeMap/top.jpg",
-        "Resources/Image/CubeMap/bottom.jpg",
-        "Resources/Image/CubeMap/front.jpg",
-        "Resources/Image/CubeMap/back.jpg"
-    };
-    
-    public CubeMap(string[]? paths)
-    {
-        paths ??= _defaultCubeMapFaces;
-        
         // Initialize shaders and buffers
         Initialize();
 
@@ -170,12 +158,14 @@ public class CubeMap : IDisposable
         _cubeMapShader = new Shader("Resources/Shader/CubeMap.vert", "Resources/Shader/CubeMap.frag");
         _skyboxShader = new Shader("Resources/Shader/Skybox.vert", "Resources/Shader/Skybox.frag");
 
+        _cubeMapShader.Initialize();
+        _skyboxShader.Initialize();
+        
         _cubeMapShader.Use();
         _cubeMapShader.SetUniform("skybox", 0);
 
         _skyboxShader.Use();
         _skyboxShader.SetUniform("skybox", 0);
-
     }
 
     private int LoadCubemapTexture(string[] paths)

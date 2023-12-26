@@ -6,10 +6,12 @@ namespace OpenTK_Renderer;
 
 public class Model : IDisposable
 {
-    public List<Mesh> Meshes = new ();
-    private readonly Scene _raw;
+    private readonly List<Mesh> _meshes = new ();
+    
+    private readonly Assimp.Scene _raw;
     private List<TextureInfo> _texturesLoaded = new List<TextureInfo>();
-    private string _directory;
+    private readonly string _directory;
+    private Matrix4 ModelMatrix = Matrix4.Identity;
 
     public Model(string path)
     {
@@ -36,14 +38,16 @@ public class Model : IDisposable
         {
             throw new Exception("failed to read file: " + path + " (" + e.Message + ")");
         }
+
+        ModelMatrix = ImportUtility.FromMatrix4dto4(_raw.RootNode.Transform);
     }
 
-    private void ProcessNode(Node node, Scene scene)
+    private void ProcessNode(Node node, Assimp.Scene scene)
     {
         for (int i = 0; i < node.MeshCount; i++)
         {
             var mesh = scene.Meshes[i];
-            Meshes.Add(ProcessMesh(mesh, scene));
+            _meshes.Add(ProcessMesh(mesh, scene));
         }
 
         for (int i = 0; i < node.ChildCount; i++)
@@ -52,7 +56,7 @@ public class Model : IDisposable
         }
     }
 
-    private Mesh ProcessMesh(Assimp.Mesh mesh, Scene scene)
+    private Mesh ProcessMesh(Assimp.Mesh mesh, Assimp.Scene scene)
     {
         var vertice = new List<Vertex>();
         for (int i = 0; i < mesh.VertexCount; i++)
@@ -110,17 +114,30 @@ public class Model : IDisposable
         return new Mesh(vertice.ToArray(), indices.ToArray(), textures.ToArray());
     }
 
-    public void Draw(Shader shader)
+    /// <summary>
+    /// Draw this model at Model matrix;
+    /// </summary>
+    /// <param name="shader">Shader program for this model</param>
+    public void Draw(Shader shader) => Draw(shader, ModelMatrix);
+
+    /// <summary>
+    /// Draw this model at 
+    /// </summary>
+    /// <param name="shader">Shader program for this model</param>
+    /// <param name="model">Model Matrix to transform this model</param>
+    public void Draw(Shader shader, Matrix4 model)
     {
-        foreach (var mesh in Meshes)
+        shader.SetUniform("model", model);
+        
+        foreach (var mesh in _meshes)
         {
             mesh.Draw(shader);
         }
     }
     
-    private List<TextureInfo> LoadMaterialTextures(Material mat, TextureType type, string typeName)
+    private IEnumerable<TextureInfo> LoadMaterialTextures(Material mat, TextureType type, string typeName)
     {
-        List<TextureInfo> textures = new List<TextureInfo>();
+        var textures = new List<TextureInfo>();
         for (var i = 0; i < mat.GetMaterialTextureCount(type); i++)
         {
             TextureSlot str;
@@ -159,11 +176,39 @@ public class Model : IDisposable
 
         return (uint)t.ID;
     }
-    
+
+    /// <summary>
+    /// Scale model matrix 
+    /// </summary>
+    /// <param name="value">Scale value</param>
+    public void Scale(float value)
+    {
+        ModelMatrix *= Matrix4.CreateScale(value);
+    }
+
+    /// <summary>
+    /// Translate model matrix
+    /// </summary>
+    /// <param name="position">Translation value</param>
+    public void Translate(Vector3 position)
+    {
+        ModelMatrix *= Matrix4.CreateTranslation(position);
+    }
+
+    /// <summary>
+    /// Rotate model matrix
+    /// </summary>
+    /// <param name="axis">Axis to rotate</param>
+    /// <param name="angle">Angle to rotate</param>
+    public void Rotate(Vector3 axis, float angle)
+    {
+        ModelMatrix*= Matrix4.CreateFromAxisAngle(axis, angle);
+    }
+
     public void Dispose()
     {
         // TODO need to dispose all datas
-        Meshes.Clear();
+        _meshes.Clear();
         GC.SuppressFinalize(this);
     }
 }
