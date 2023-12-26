@@ -104,7 +104,8 @@ public class Scene
     public void Update()
     {
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-
+        GL.Enable(EnableCap.DepthTest);
+        
         foreach (var obj in _objects)
         {
             obj.Update();
