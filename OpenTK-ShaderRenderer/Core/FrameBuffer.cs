@@ -29,8 +29,8 @@ public class FrameBuffer
         GL.BindVertexArray(_vao);
         
         //  Screen Vbo       
-        var _vbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+        var vbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
         GL.BufferData(BufferTarget.ArrayBuffer, _screenVertices.Length * sizeof(float), _screenVertices, BufferUsageHint.StaticDraw);
         
         GL.EnableVertexAttribArray(0);
@@ -87,6 +87,9 @@ public class FrameBuffer
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
     }
     
+    /// <summary>
+    /// Process framebuffer
+    /// </summary>
     public void Process()
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

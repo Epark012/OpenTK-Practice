@@ -85,6 +85,7 @@ namespace OpenTK_Renderer
             
             // Second pass
             _fbo.Process();
+            
             SwapBuffers();
         }
 
