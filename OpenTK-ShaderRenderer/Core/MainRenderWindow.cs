@@ -14,7 +14,8 @@ namespace OpenTK_Renderer
         
         private Scene _scene;
         private Camera _camera;
-        
+        private FrameBuffer _fbo;
+
         protected override void OnLoad()
         {
             base.OnLoad();
@@ -53,6 +54,8 @@ namespace OpenTK_Renderer
             // Initialize fields
             _camera = _scene.Camera;
             CursorState = CursorState.Grabbed;
+
+            _fbo = new FrameBuffer(Size.X, Size.Y);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -68,16 +71,21 @@ namespace OpenTK_Renderer
         
         protected override void OnRenderFrame(FrameEventArgs args)
         {
-            Title = $"Running - Vsync: {VSync}) FPS: {1f / args.Time:0}";
-            GL.Viewport(0, 0, Size.X, Size.Y);
-
             base.OnRenderFrame(args);
+            
+            Title = $"Running - Vsync: {VSync}) FPS: {1f / args.Time:0}";
+
+            // Render scene
+            _fbo.Bind();
             
             {
                 _scene.Update();
                 _scene.Render();
             }
-
+            
+            // Second pass
+            _fbo.Process();
+            
             SwapBuffers();
         }
 
@@ -88,7 +96,8 @@ namespace OpenTK_Renderer
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
-
+            
+            // _fbo?.Initialize(Size.X, Size.Y);
             GL.Viewport(0, 0, Size.X, Size.Y);
         }
     }

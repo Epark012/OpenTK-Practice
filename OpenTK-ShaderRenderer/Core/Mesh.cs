@@ -9,7 +9,7 @@ public class Mesh
     private readonly uint[] _indices;
     private readonly TextureInfo[] _textures;
 
-    private int _vao, _vbo, _ebo;
+    private int _vao;
 
     public Mesh(Vertex[] vertices, uint[] indices, TextureInfo[] textures)
     {
@@ -36,12 +36,12 @@ public class Mesh
         GL.BindVertexArray(_vao);
         
         // Vbo
-        _vbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+        var vbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
         GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * Vertex.Stride, _vertices, BufferUsageHint.StaticDraw);
         
-        _ebo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+        var ebo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
         GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
         GL.EnableVertexAttribArray(0);
