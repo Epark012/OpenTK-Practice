@@ -14,11 +14,7 @@ namespace OpenTK_Renderer
         
         private Scene _scene;
         private Camera _camera;
-        private int fbo;
-
-        private int _quadVao, _quadVbo;
-        private Shader _screenShader;
-        private int _frameBufferTexture;
+        private FrameBuffer _fbo;
 
         protected override void OnLoad()
         {
@@ -59,64 +55,7 @@ namespace OpenTK_Renderer
             _camera = _scene.Camera;
             CursorState = CursorState.Grabbed;
 
-            float[] quadVertices = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-                // positions   // texCoords
-                -1.0f,  1.0f,  0.0f, 1.0f,
-                -1.0f, -1.0f,  0.0f, 0.0f,
-                1.0f, -1.0f,  1.0f, 0.0f,
-
-                -1.0f,  1.0f,  0.0f, 1.0f,
-                1.0f, -1.0f,  1.0f, 0.0f,
-                1.0f,  1.0f,  1.0f, 1.0f
-            };
-            
-            // screen quad VAO
-            _quadVao = GL.GenVertexArray();
-            GL.BindVertexArray(_quadVao);
-
-            _quadVbo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _quadVbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, quadVertices.Length * sizeof(float), quadVertices, BufferUsageHint.StaticDraw);
-
-            GL.EnableVertexAttribArray(0);
-            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
-
-            GL.EnableVertexAttribArray(1);
-            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 2 * sizeof(float));
-
-            _screenShader = new Shader("Resources/Shader/Screen.vert", "Resources/Shader/Screen.frag");
-            _screenShader.Initialize();
-            
-            _screenShader.SetUniform("screenTexture", 0);
-            
-            // Generate frame buffer
-            fbo = GL.GenFramebuffer();
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
-
-            // Create color texture
-            _frameBufferTexture = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, _frameBufferTexture);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, Size.X, Size.Y, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
-            
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
-
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, _frameBufferTexture, 0);
-
-            var rbo = GL.GenRenderbuffer();
-            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, rbo);
-            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Depth24Stencil8, Size.X, Size.Y);
-            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, rbo);
-            
-            if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != FramebufferErrorCode.FramebufferComplete)
-            {
-                throw new Exception("Framebuffer is not working");
-            }
-
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            _fbo = new FrameBuffer(Size.X, Size.Y);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -136,30 +75,17 @@ namespace OpenTK_Renderer
             
             Title = $"Running - Vsync: {VSync}) FPS: {1f / args.Time:0}";
 
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
+            // Render scene
+            _fbo.Bind();
+            
             {
                 _scene.Update();
                 _scene.Render();
-                
-                _screenShader.Use();
-                GL.BindVertexArray(_quadVao);
-                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
             }
             
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            _screenShader.Use();
-            GL.BindVertexArray(_quadVao);
-            GL.Disable(EnableCap.DepthTest);
-            GL.BindTexture(TextureTarget.Texture2D, _frameBufferTexture);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
-
-            GL.Enable(EnableCap.DepthTest);
-
+            // Second pass
+            _fbo.Process();
             SwapBuffers();
-            
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
         /// <summary>
@@ -169,7 +95,8 @@ namespace OpenTK_Renderer
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
-
+            
+            // _fbo?.Initialize(Size.X, Size.Y);
             GL.Viewport(0, 0, Size.X, Size.Y);
         }
     }
