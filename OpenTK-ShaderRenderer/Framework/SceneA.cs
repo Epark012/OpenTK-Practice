@@ -1,6 +1,5 @@
 ﻿using OpenTK_Renderer.Rendering;
 using OpenTK_Renderer.Rendering.Lighting;
-using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace OpenTK_Renderer;
@@ -8,7 +7,7 @@ namespace OpenTK_Renderer;
 /// <summary>
 /// Scene to render in project
 /// </summary>
-public class Scene
+public class SceneA
 {
     public Camera Camera { get; private set; }
     private readonly RenderSetting _renderSetting;
@@ -30,17 +29,17 @@ public class Scene
 
     private Matrix4 _view = Matrix4.Identity;
     private Matrix4 _projection = Matrix4.Identity;
-    private readonly Action<Scene> _onInitialized;
+    private readonly Action<SceneA> _onInitialized;
 
     #endregion
     
-    public Scene(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap, Action<Scene>? onInitialized = null, params Object[] models)
+    public SceneA(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap, Action<SceneA>? onInitialized = null, params Object[] models)
     {
-        _renderSetting = renderSetting;
+        /*_renderSetting = renderSetting;
         Camera = camera;
         _cubeMap = cubeMap;
         _objects = models.ToList();
-        _onInitialized = onInitialized;
+        _onInitialized = onInitialized;*/
 
         _pointLights = new PointLight[_pointLightPositions.Length];
     }
@@ -79,6 +78,7 @@ public class Scene
             MathF.Cos(MathHelper.DegreesToRadians(12.5f)),
             MathF.Cos(MathHelper.DegreesToRadians(17.5f)));
         
+        /*
         // Initialize objects
         foreach (var obj in _objects)
         {
@@ -95,7 +95,7 @@ public class Scene
             GL.ClearColor(_renderSetting.DefaultBackGroundColor);
         }
         
-        _onInitialized?.Invoke(this);
+        _onInitialized?.Invoke(this);*/
     }
 
     /// <summary>
@@ -103,14 +103,14 @@ public class Scene
     /// </summary>
     public void Update()
     {
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        /*GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         // GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
         GL.Enable(EnableCap.DepthTest);
         
         foreach (var obj in _objects)
         {
             obj.Update();
-        }
+        }*/
     }
     
     /// <summary>
@@ -118,7 +118,7 @@ public class Scene
     /// </summary>
     public void Render()
     {
-        // Set uniform config
+        /*// Set uniform config
         _view = Camera.GetViewMatrix();
         _projection = Camera.GetProjectionMatrix();
 
@@ -132,6 +132,6 @@ public class Scene
         if (_renderSetting.RenderSkybox && _cubeMap != null)
         {
             _cubeMap.RenderSkybox(_view, _projection);            
-        }
+        }*/
     }
 }

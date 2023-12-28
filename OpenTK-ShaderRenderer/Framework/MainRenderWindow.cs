@@ -30,9 +30,8 @@ namespace OpenTK_Renderer
             
             // Stencil Test
             // GL.Enable(EnableCap.StencilTest);
-
-            // Initialize scene
-            _scene = new Scene( RenderSetting, 
+            
+            _scene = new Default( RenderSetting, 
                     new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y), 
                     null,
                     null,
@@ -48,8 +47,6 @@ namespace OpenTK_Renderer
                             obj.Model.Scale(0.2f);
                             obj.Model.Translate(new Vector3(1.2f, 1.0f, 2.0f));
                         }));
-
-            _scene.Initialize();
             
             // Initialize fields
             _camera = _scene.Camera;
