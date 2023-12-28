@@ -29,9 +29,15 @@ namespace OpenTK_Renderer
             // Default Depth Function
             GL.DepthFunc(DepthFunction.Less);
             
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Back);
+            
             // Stencil Test
             // GL.Enable(EnableCap.StencilTest);
- 
+
+            // Turn off render Skybox
+            RenderSetting.RenderSkybox = false;
+            
             _scene = new Shadow(RenderSetting,
                 new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y));
             

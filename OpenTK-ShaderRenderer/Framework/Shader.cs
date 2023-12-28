@@ -4,7 +4,7 @@ using System.Text;
 namespace OpenTK_Renderer
 {
     /// <summary>
-    /// Info struct for shader initialization
+    /// TODO: Info struct for shader initialization
     /// </summary>
     public struct ShaderInfo
     {
@@ -24,6 +24,7 @@ namespace OpenTK_Renderer
         private readonly string _fragmentPath;
         
         // TODO: Make exception for shader, or log library
+        // TODO: Need to make dynamically for lighting
         public Shader(string vertexPath, string fragPath)
         {
             _vertexPath = vertexPath;

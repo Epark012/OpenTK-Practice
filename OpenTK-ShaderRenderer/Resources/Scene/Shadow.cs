@@ -25,12 +25,14 @@ public class Shadow : OpenTK_Renderer.Scene
         Objects = models.ToList();
         
         OnInitialized = onInitialized;
-        
+
         var directionalLight = new DirectionalLight(new Vector3(-0.2f, -1.0f, -0.3f),
             new Vector3(0.05f, 0.05f, 0.05f),
             new Vector3(0.4f, 0.4f, 0.4f),
             new Vector3(0.5f, 0.5f, 0.5f)
         );
+        
+        Lights.Add(directionalLight);
         
         // Initialize spot light
         var spotLight = new SpotLight(new Vector3(0.0f, 0.0f, 0.0f), 
@@ -58,6 +60,7 @@ public class Shadow : OpenTK_Renderer.Scene
             Lights.Add(pointLight);
         }
 
+        // Add box objects
         for (var i = 0; i < _boxCount; i++)
         {
             var cube = new Object(new Model("Resources/Model/Cube.fbx"),
@@ -72,8 +75,16 @@ public class Shadow : OpenTK_Renderer.Scene
             Objects.Add(cube);
         }
         
-        Lights.Add(directionalLight);
-
+        // Add room 
+        var room = new Object(new Model("Resources/Model/Room.fbx", "Resources/Image/wall.jpg"),
+            new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag"),
+            o =>
+            {
+                o.Model.Scale(10);   
+            });
+        
+        Objects.Add(room);
+        
         // Initialize fields
         Initialize();
     }
