@@ -4,8 +4,11 @@ using OpenTK.Mathematics;
 
 namespace OpenTK_Renderer.Resources.Scene;
 
-public class Default : OpenTK_Renderer.Scene
+public class Shadow : OpenTK_Renderer.Scene
 {
+    private int _boxCount = 10;
+    private float _positionRange = 5;
+    
     private readonly Vector3[] _pointLightPositions =
     {
         new (0.7f, 0.2f, 2.0f),
@@ -14,7 +17,7 @@ public class Default : OpenTK_Renderer.Scene
         new (0.0f, 0.0f, -3.0f)
     };
     
-    public Default(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap = null, Action<OpenTK_Renderer.Scene>? onInitialized = null, params Object[] models) : base(renderSetting, camera, cubeMap, onInitialized, models)
+    protected internal Shadow(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap = null, Action<OpenTK_Renderer.Scene>? onInitialized = null, params Object[] models) : base(renderSetting, camera, cubeMap, onInitialized, models)
     {
         RenderSetting = renderSetting;
         Camera = camera;
@@ -22,14 +25,12 @@ public class Default : OpenTK_Renderer.Scene
         Objects = models.ToList();
         
         OnInitialized = onInitialized;
-           
+        
         var directionalLight = new DirectionalLight(new Vector3(-0.2f, -1.0f, -0.3f),
             new Vector3(0.05f, 0.05f, 0.05f),
             new Vector3(0.4f, 0.4f, 0.4f),
             new Vector3(0.5f, 0.5f, 0.5f)
         );
-        
-        Lights.Add(directionalLight);
         
         // Initialize spot light
         var spotLight = new SpotLight(new Vector3(0.0f, 0.0f, 0.0f), 
@@ -56,7 +57,23 @@ public class Default : OpenTK_Renderer.Scene
             
             Lights.Add(pointLight);
         }
+
+        for (var i = 0; i < _boxCount; i++)
+        {
+            var cube = new Object(new Model("Resources/Model/Cube.fbx"),
+                new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag"),
+                o =>
+                {
+                    var position = Random.GenerateRandomVector3(_positionRange);
+                    o.Model.Translate(position);
+                    o.Model.Rotate(Random.GenerateRandomAxis(), Random.GenerateRandomFloat(-90, 90));
+                });
+
+            Objects.Add(cube);
+        }
         
+        Lights.Add(directionalLight);
+
         // Initialize fields
         Initialize();
     }

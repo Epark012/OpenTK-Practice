@@ -111,6 +111,19 @@ public class Model : IDisposable
         var heightMaps = LoadMaterialTextures(material, TextureType.Ambient, "texture_height");
         textures.AddRange(heightMaps);
         
+        // Use default texture if texture is null
+        if (_texturesLoaded.Count < 1)
+        {
+            var t = new Texture("Resources/Image/container.png");
+            TextureInfo texture;
+            texture.Id = (uint)t.ID;
+            texture.Type = "texture_diffuse";
+            texture.Path = "Resources/Image/container.png";
+
+            Console.WriteLine("Default texture loaded");
+            textures.Add(texture);
+        }
+        
         return new Mesh(vertice.ToArray(), indices.ToArray(), textures.ToArray());
     }
 
@@ -165,7 +178,7 @@ public class Model : IDisposable
                 _texturesLoaded.Add(texture);
             }
         }
-        
+
         return textures;
     }
     

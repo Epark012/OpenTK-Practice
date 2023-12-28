@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK_Renderer.Resources.Scene;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 
@@ -30,23 +31,9 @@ namespace OpenTK_Renderer
             
             // Stencil Test
             // GL.Enable(EnableCap.StencilTest);
-            
-            _scene = new Default( RenderSetting, 
-                    new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y), 
-                    null,
-                    null,
-            new Object(new Model("Resources/Model/Ship.fbx"), new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag"),
-                     obj =>
-                    {
-                        obj.Model.Rotate(new Vector3(0, 1,1), 30);
-                        obj.Model.Translate(new Vector3(0,0, -5));
-                    }),
-                    new Object(new Model("Resources/Model/Cube.fbx"), new Shader("Resources/Shader/Light.vert", "Resources/Shader/Light.frag"),
-                        obj =>
-                        {
-                            obj.Model.Scale(0.2f);
-                            obj.Model.Translate(new Vector3(1.2f, 1.0f, 2.0f));
-                        }));
+ 
+            _scene = new Shadow(RenderSetting,
+                new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y));
             
             // Initialize fields
             _camera = _scene.Camera;

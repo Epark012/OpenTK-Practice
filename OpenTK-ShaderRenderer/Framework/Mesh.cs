@@ -92,7 +92,7 @@ public class Mesh
 
             // now set the sampler to the correct texture unit
             shader.SetUniform(type + number, i);
-
+            
             GL.ActiveTexture(TextureUnit.Texture0 + i);
             GL.BindTexture(TextureTarget.Texture2D, _textures[i].Id);
         }

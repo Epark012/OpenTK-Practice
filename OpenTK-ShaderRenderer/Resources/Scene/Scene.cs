@@ -17,13 +17,13 @@ public class Scene
     protected List<Object> Objects;
 
     // Light
-    protected List<Light> Lights = new ();
+    protected readonly List<Light> Lights = new ();
     
     private Matrix4 _view = Matrix4.Identity;
     private Matrix4 _projection = Matrix4.Identity;
     protected Action<Scene>? OnInitialized;
 
-    public Scene(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap, Action<Scene>? onInitialized = null, params Object[] models)
+    protected Scene(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap = null, Action<Scene>? onInitialized = null, params Object[] models)
     {
         RenderSetting = renderSetting;
         Camera = camera;
@@ -31,13 +31,15 @@ public class Scene
         Objects = models.ToList();
         
         OnInitialized = onInitialized;
-           
-        // Initialize fields
-        Initialize();
     }
 
     protected void Initialize()
     {
+        if (Lights.Count < 1)
+        {
+            Console.WriteLine("No lights applied in the scene");
+        }
+        
         // Initialize objects
         foreach (var obj in Objects)
         {
