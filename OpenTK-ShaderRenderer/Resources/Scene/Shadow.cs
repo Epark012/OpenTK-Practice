@@ -76,7 +76,7 @@ public class Shadow : OpenTK_Renderer.Scene
         }
         
         // Add room 
-        var room = new Object(new Model("Resources/Model/Room.fbx", "Resources/Image/wall.jpg"),
+        var room = new Object(new Model("Resources/Model/Room.fbx", "Resources/Image/RoughWall.jpg"),
             new Shader("Resources/Shader/Default.vert", "Resources/Shader/Default.frag"),
             o =>
             {

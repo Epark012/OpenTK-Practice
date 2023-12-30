@@ -1,7 +1,10 @@
-﻿using OpenTK_Renderer.Resources.Scene;
+﻿using System.Numerics;
+using ImGuiNET;
+using OpenTK_Renderer.GUI;
+using OpenTK_Renderer.Resources.Scene;
 using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OpenTK_Renderer
 {
@@ -16,6 +19,8 @@ namespace OpenTK_Renderer
         private Scene _scene;
         private Camera _camera;
         private FrameBuffer _fbo;
+
+        private GUIController _controller;
 
         protected override void OnLoad()
         {
@@ -43,9 +48,11 @@ namespace OpenTK_Renderer
             
             // Initialize fields
             _camera = _scene.Camera;
-            CursorState = CursorState.Grabbed;
+            // CursorState = CursorState.Grabbed;
 
-            _fbo = new FrameBuffer(Size.X, Size.Y);
+            _fbo = new FrameBuffer(ClientSize.X, ClientSize.Y);
+            
+            _controller = new GUIController(ClientSize.X, ClientSize.Y);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -65,6 +72,8 @@ namespace OpenTK_Renderer
             
             Title = $"Running - Vsync: {VSync}) FPS: {1f / args.Time:0}";
 
+            _controller.Update(this, (float)args.Time);
+            
             // Render scene
             _fbo.Bind();
             
@@ -76,6 +85,15 @@ namespace OpenTK_Renderer
             // Second pass
             _fbo.Process();
             
+            
+            // Enable Docking
+            // ImGui.DockSpaceOverViewport();
+            // ImGui.ShowDemoWindow();
+
+            _controller.Render();
+            
+            GUIController.CheckGLError("End of frame");
+            
             SwapBuffers();
         }
 
@@ -86,9 +104,25 @@ namespace OpenTK_Renderer
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
-            
+
             // _fbo?.Initialize(Size.X, Size.Y);
-            GL.Viewport(0, 0, Size.X, Size.Y);
+            GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
+            
+            _controller.WindowResized(ClientSize.X, ClientSize.Y);
+        }
+
+        protected override void OnTextInput(TextInputEventArgs e)
+        {
+            base.OnTextInput(e);
+            
+            _controller.PressChar((char)e.Unicode);
+        }
+
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            
+            _controller.MouseScroll(e.Offset);
         }
     }
 }

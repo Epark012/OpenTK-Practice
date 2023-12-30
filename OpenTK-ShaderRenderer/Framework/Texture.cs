@@ -22,22 +22,8 @@ namespace OpenTK_Renderer
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="id">Id for texture</param>
-        private Texture(int id)
-        {
-            ID = id;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
         /// <param name="path">path for loading texture</param>
         public Texture(string path)
-        {
-            LoadFromFile(path);
-        }
-
-        private void LoadFromFile(string path)
         {
             // Generate handle
             ID = GL.GenTexture();
@@ -62,11 +48,9 @@ namespace OpenTK_Renderer
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-
-            new Texture(ID);
         }
 
-        public void Use(TextureUnit unit = TextureUnit.Texture0)
+        private void Use(TextureUnit unit = TextureUnit.Texture0)
         {
             GL.ActiveTexture(unit);
             GL.BindTexture(TextureTarget.Texture2D, ID);
