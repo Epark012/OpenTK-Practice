@@ -19,7 +19,8 @@ public class Object
 
         _onInitialized = onInitialized;
     }
-    public void Initialize(DirectionalLight dirLight, SpotLight spotLight, PointLight[] pointLights)
+    // public void Initialize(DirectionalLight dirLight, SpotLight spotLight, PointLight[] pointLights)
+    public void Initialize(List<Light> lights)
     {
             // Create shaders
             Shader.Initialize();
@@ -27,15 +28,27 @@ public class Object
             // Set material
             _material = new Material(0, 1, 32.0f);
             SetMaterial(_material);
-            
-            // Directional light
-            SetDirLight(dirLight);
 
-            // Spot light
-            SetSpotLight(spotLight);
-                
+            var pointLights = new List<PointLight>();
+            foreach (var light in lights)
+            {
+                switch (light)
+                {
+                    case DirectionalLight directionalLight:
+                        SetDirLight(directionalLight);
+                        break;
+                    case SpotLight spotLight:
+                        SetSpotLight(spotLight);
+                        break;
+                    case PointLight pointLight:
+                        pointLights.Add(pointLight);            
+                        break;
+                }
+            }
+            
             // Point lights
-            SetPointLights(pointLights);
+            if (pointLights.Count > 0)
+                SetPointLights(pointLights);
 
             _onInitialized?.Invoke(this);
     }
@@ -57,9 +70,9 @@ public class Object
         _appliedLights.Add(light);
     }
     
-    private void SetPointLights(PointLight[] pointLights)
+    private void SetPointLights(List<PointLight> pointLights)
     {
-        for (var i = 0; i < pointLights.Length; i++)
+        for (var i = 0; i < pointLights.Count; i++)
         {
             Shader.SetUniform($"pointLights[{i}].position", pointLights[i]);
             Shader.SetUniform($"pointLights[{i}].ambient", new Vector3(0.05f, 0.05f, 0.05f));

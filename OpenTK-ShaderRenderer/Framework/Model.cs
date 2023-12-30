@@ -13,8 +13,12 @@ public class Model : IDisposable
     private readonly string _directory;
     private Matrix4 ModelMatrix = Matrix4.Identity;
 
-    public Model(string path)
+    private string _defaultTexture;
+    
+    public Model(string path, string? customTexture = null)
     {
+        _defaultTexture = string.IsNullOrEmpty(customTexture) ? "Resources/Image/container.png" : customTexture;
+        
         // Load model
         try
         {
@@ -111,6 +115,19 @@ public class Model : IDisposable
         var heightMaps = LoadMaterialTextures(material, TextureType.Ambient, "texture_height");
         textures.AddRange(heightMaps);
         
+        // Use default texture if texture is null
+        if (_texturesLoaded.Count < 1)
+        {
+            var t = new Texture(_defaultTexture);
+            TextureInfo texture;
+            texture.Id = (uint)t.ID;
+            texture.Type = "texture_diffuse";
+            texture.Path = "Resources/Image/container.png";
+
+            Console.WriteLine("Default texture loaded");
+            textures.Add(texture);
+        }
+        
         return new Mesh(vertice.ToArray(), indices.ToArray(), textures.ToArray());
     }
 
@@ -165,7 +182,7 @@ public class Model : IDisposable
                 _texturesLoaded.Add(texture);
             }
         }
-        
+
         return textures;
     }
     

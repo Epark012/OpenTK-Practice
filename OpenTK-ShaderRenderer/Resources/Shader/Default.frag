@@ -99,6 +99,7 @@ void main()
     result += CalculateSpotLight(spotLight, norm, FragPos, viewDir);
     
     outputColor = vec4(result, 1.0);
+    // outputColor = texture(material.diffuse, TexCoords);
     return;
 }
 

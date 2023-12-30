@@ -1,7 +1,7 @@
 ﻿using OpenTK_Renderer;
 
-Console.WriteLine("Running Test Project");
-using (var window = new MainRenderWindow(1440, 1080, "Main Window"))
+Console.WriteLine("Renderer engine");
+using (var engine = new Engine())
 {
-    window.Run();
+    engine.Run();   
 }
