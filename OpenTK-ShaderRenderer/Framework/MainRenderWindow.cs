@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-using ImGuiNET;
-using OpenTK_Renderer.GUI;
+﻿using OpenTK_Renderer.GUI;
 using OpenTK_Renderer.Resources.Scene;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
@@ -34,8 +32,8 @@ namespace OpenTK_Renderer
             // Default Depth Function
             GL.DepthFunc(DepthFunction.Less);
             
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
+            // GL.Enable(EnableCap.CullFace);
+            // GL.CullFace(CullFaceMode.Back);
             
             // Stencil Test
             // GL.Enable(EnableCap.StencilTest);
@@ -43,7 +41,7 @@ namespace OpenTK_Renderer
             // Turn off render Skybox
             RenderSetting.RenderSkybox = false;
             
-            _scene = new Shadow(RenderSetting,
+            _scene = new Blending(RenderSetting,
                 new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y));
             
             // Initialize fields

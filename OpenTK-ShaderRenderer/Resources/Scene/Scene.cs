@@ -16,12 +16,15 @@ public class Scene
     protected CubeMap? CubeMap;
     protected List<Object> Objects;
 
+    protected Action<Scene>? OnInitialized;
+    protected Action<Scene>? OnUpdate; 
+    protected Action<Scene>? OnRender; 
+
     // Light
     protected readonly List<Light> Lights = new ();
     
     private Matrix4 _view = Matrix4.Identity;
     private Matrix4 _projection = Matrix4.Identity;
-    protected Action<Scene>? OnInitialized;
 
     protected Scene(RenderSetting renderSetting, Camera camera, CubeMap? cubeMap = null, Action<Scene>? onInitialized = null, params Object[] models)
     {
@@ -33,7 +36,7 @@ public class Scene
         OnInitialized = onInitialized;
     }
 
-    protected void Initialize()
+    protected virtual void Initialize()
     {
         if (Lights.Count < 1)
         {
@@ -60,7 +63,7 @@ public class Scene
         OnInitialized?.Invoke(this);
     }
     
-    public void Update()
+    public virtual void Update()
     {
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
         GL.Enable(EnableCap.DepthTest);
@@ -69,12 +72,14 @@ public class Scene
         {
             obj.Update();
         }
+        
+        OnUpdate?.Invoke(this);
     }
     
     /// <summary>
     /// Render this scene
     /// </summary>
-    public void Render()
+    public virtual void Render()
     {
         // Set uniform config
         _view = Camera.GetViewMatrix();
@@ -91,5 +96,7 @@ public class Scene
         {
             CubeMap.RenderSkybox(_view, _projection);            
         }
+        
+        OnRender?.Invoke(this);
     }
 }

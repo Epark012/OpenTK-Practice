@@ -11,7 +11,7 @@ public class Model : IDisposable
     private readonly Assimp.Scene _raw;
     private List<TextureInfo> _texturesLoaded = new List<TextureInfo>();
     private readonly string _directory;
-    private Matrix4 ModelMatrix = Matrix4.Identity;
+    public Matrix4 ModelMatrix = Matrix4.Identity;
 
     private string _defaultTexture;
     
@@ -219,7 +219,7 @@ public class Model : IDisposable
     /// <param name="angle">Angle to rotate</param>
     public void Rotate(Vector3 axis, float angle)
     {
-        ModelMatrix*= Matrix4.CreateFromAxisAngle(axis, angle);
+        ModelMatrix *= Matrix4.CreateFromAxisAngle(axis, angle);
     }
 
     public void Dispose()

@@ -1,5 +1,6 @@
 ﻿using OpenTK_Renderer.Rendering;
 using OpenTK_Renderer.Rendering.Lighting;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace OpenTK_Renderer;
@@ -25,6 +26,8 @@ public class Object
             // Create shaders
             Shader.Initialize();
 
+            Shader.Use();
+            
             // Set material
             _material = new Material(0, 1, 32.0f);
             SetMaterial(_material);
@@ -102,26 +105,32 @@ public class Object
 
     public void Update()
     {
+        Shader.Use();
+        
         // Set runtime light uniforms
         foreach (var appliedLight in _appliedLights)
         {
             appliedLight.Update();
         }
+        
+        GL.UseProgram(0);
     }
     
     public void Render(Camera camera, Matrix4 view, Matrix4 projection)
     {
+        Shader.Use();
+        
         // TODO Set runtime lighting
         Shader.SetUniform("spotLight.position", camera.Position);
         Shader.SetUniform("spotLight.direction", camera.Front);
         
         // Render model
-        Shader.Use();
         Shader.SetUniform<Matrix4>("view", view);
         Shader.SetUniform<Matrix4>("projection", projection);
 
-        Shader.SetUniform("viewPos", camera);
+        Shader.SetUniform("viewPos", camera.Position);
         
         Model.Draw(Shader);
+        GL.UseProgram(0);
     }
 }
