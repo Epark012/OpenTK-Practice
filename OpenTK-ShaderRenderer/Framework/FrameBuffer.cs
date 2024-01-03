@@ -1,11 +1,13 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using System.Numerics;
+using OpenTK.Graphics.OpenGL4;
 
 namespace OpenTK_Renderer;
 
 public class FrameBuffer
 {
     public int ID { get; set; }
-
+    public readonly int BufferTexture;
+    
     private readonly int _vao;
     private readonly float[] _screenVertices = 
     {
@@ -20,8 +22,8 @@ public class FrameBuffer
     };
 
     private readonly Shader _screenShader;
-    private readonly int _frameBufferTexture;
-    
+    private readonly int _rbo;
+
     public FrameBuffer(int width, int height)
     {
         // Screen VaO
@@ -50,8 +52,8 @@ public class FrameBuffer
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
         
         // Create color texture
-        _frameBufferTexture = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, _frameBufferTexture);
+        BufferTexture = GL.GenTexture();
+        GL.BindTexture(TextureTarget.Texture2D, BufferTexture);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, width, height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
             
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
@@ -59,18 +61,17 @@ public class FrameBuffer
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
 
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, _frameBufferTexture, 0);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, BufferTexture, 0);
 
         // Generate render buffer
-        var rbo = GL.GenRenderbuffer();
-        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, rbo);
+        _rbo = GL.GenRenderbuffer();
+        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, _rbo);
         GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Depth24Stencil8, width, height);
-        GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, rbo);
+        GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, _rbo);
 
         switch (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer))
         {
             case FramebufferErrorCode.FramebufferComplete:
-                Console.WriteLine("Frame buffer is compiled correctly");
                 break;
             default:
                 throw new Exception("Framebuffer is not working");
@@ -82,9 +83,34 @@ public class FrameBuffer
     /// <summary>
     /// Bind this framebuffer
     /// </summary>
-    public void Bind()
+    public void Bind(bool toggle)
     {
-        GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, toggle ? ID : 0);
+    }
+
+    /// <summary>
+    /// Resize framebuffer texture
+    /// </summary>
+    /// <param name="width">Width</param>
+    /// <param name="height">Height</param>
+    public void Resize(int width, int height)
+    {
+        // Create color texture
+        GL.BindTexture(TextureTarget.Texture2D, BufferTexture);
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, width, height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
+            
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, BufferTexture, 0);
+
+        // Generate render buffer
+        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, _rbo);
+        GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Depth24Stencil8, width, height);
+        GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, _rbo);
+
     }
     
     /// <summary>
@@ -99,7 +125,7 @@ public class FrameBuffer
         GL.BindVertexArray(_vao);
         GL.Disable(EnableCap.DepthTest);
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, _frameBufferTexture);
+        GL.BindTexture(TextureTarget.Texture2D, BufferTexture);
         
         GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 
