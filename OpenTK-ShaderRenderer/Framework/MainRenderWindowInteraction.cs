@@ -13,6 +13,8 @@ public partial class MainRenderWindow
     private bool _firstMove = true;
     private Vector2 _lastPos;
 
+    // Game view
+    private bool _gameViewActive;
     
     /// <summary>
     /// Process Mouse Input
@@ -84,5 +86,23 @@ public partial class MainRenderWindow
         {
             _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
         }
+    }
+
+    /// <summary>
+    /// Process input 
+    /// </summary>
+    /// <param name="args">Frame event args</param>
+    private void ProcessInput(FrameEventArgs args)
+    {
+        if (!_gameViewActive)
+        {
+            return;
+        }
+        
+        // Process input
+        ProcessKeyboardInput(args);
+
+        // Get the mouse state
+        ProcessMouseInput();
     }
 }
