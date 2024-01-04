@@ -24,11 +24,11 @@ public partial class MainRenderWindow
         ImGui.Begin("Window");
 
         var size = ImGui.GetContentRegionAvail();
-        _fbo.Resize((int)size.X, (int)size.Y);
+        _gameViewFrameBuffer.Resize((int)size.X, (int)size.Y);
         GL.Viewport(0, 0, (int)ClientSize.X, (int)ClientSize.Y);
             
         var pos = ImGui.GetCursorScreenPos();
-        ImGui.GetWindowDrawList().AddImage((IntPtr)_fbo.BufferTexture, 
+        ImGui.GetWindowDrawList().AddImage((IntPtr)_gameViewFrameBuffer.BufferTexture, 
             pos, 
             new Vector2(pos.X + size.X, pos.Y + size.Y), 
             _min, 

@@ -14,9 +14,9 @@ namespace OpenTK_Renderer
     {
         public MainRenderWindow(int width, int height, string title, int targetFrame = 60) : base(width, height, title, targetFrame) { }
         
-        private Scene _scene;
+        private Scene _gameViewScene;
         private Camera _camera;
-        private FrameBuffer _fbo;
+        private FrameBuffer _gameViewFrameBuffer;
 
         private GUIController _controller;
 
@@ -41,15 +41,15 @@ namespace OpenTK_Renderer
             // Turn off render Skybox
             RenderSetting.RenderSkybox = false;
             
-            _scene = new Shadow(RenderSetting,
+            _gameViewScene = new Shadow(RenderSetting,
                 new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y));
             
             // Initialize fields
-            _camera = _scene.Camera;
+            _camera = _gameViewScene.Camera;
             // CursorState = CursorState.Grabbed;
             
             _controller = new GUIController(ClientSize.X, ClientSize.Y);
-            _fbo = new FrameBuffer(ClientSize.X, ClientSize.Y);
+            _gameViewFrameBuffer = new FrameBuffer(ClientSize.X, ClientSize.Y);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -74,14 +74,14 @@ namespace OpenTK_Renderer
             RenderImGuiLayer();
 
             // Render scene
-            _fbo.Bind(true);
+            _gameViewFrameBuffer.Bind(true);
             
             {
-                _scene.Update();
-                _scene.Render();
+                _gameViewScene.Update();
+                _gameViewScene.Render();
             }
             
-            _fbo.Bind(false);
+            _gameViewFrameBuffer.Bind(false);
             
             _controller.Render();
             GUIController.CheckGLError("End of frame");
