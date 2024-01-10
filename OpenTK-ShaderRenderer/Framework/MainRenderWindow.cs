@@ -12,7 +12,8 @@ namespace OpenTK_Renderer
     /// </summary>
     public partial class MainRenderWindow : RenderWindow
     {
-        public MainRenderWindow(int width, int height, string title, int targetFrame = 60) : base(width, height, title, targetFrame) { }
+        public MainRenderWindow(WindowState windowState, string title, int targetFrameRate = 60) : base(windowState, title, targetFrameRate) { }
+        public MainRenderWindow(int width, int height, string title, int targetFrameRate = 60) : base(width, height, title, targetFrameRate) { }
         
         private Scene _gameViewScene;
         private Camera _camera;
@@ -23,9 +24,11 @@ namespace OpenTK_Renderer
         protected override void OnLoad()
         {
             base.OnLoad();
-
-            // TODO setting by mask
             
+            // Initialize UI configs
+            InitializeUIConfig();
+            
+            // TODO setting by mask
             // Enable depth
             GL.Enable(EnableCap.DepthTest);
             
@@ -42,7 +45,7 @@ namespace OpenTK_Renderer
             RenderSetting.RenderSkybox = false;
             
             _gameViewScene = new Shadow(RenderSetting,
-                new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y));
+                new Camera(Vector3.UnitZ * 3, _gameViewSize.X / (float)_gameViewSize.Y));
             
             // Initialize fields
             _camera = _gameViewScene.Camera;

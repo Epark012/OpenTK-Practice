@@ -8,25 +8,72 @@ public partial class MainRenderWindow
 {
     private readonly Vector2 _min = new (0, 1);
     private readonly Vector2 _max = new (1, 0);
+
+    #region Scene Navigation Window Config
+    private static readonly float SceneWindowWidth = 300f;
+    private static readonly Vector2 SceneWindowPosition = new(0, 19);
+    private Vector2 _sceneWindowSize;
+    #endregion
+
+    #region Inspector Window Config
+
+    private static readonly float InspectorWindowWidth = 300f;
+    private static Vector2 _inspectorWindowPosition;
+    private Vector2 _inspectorWindowSize;
+
+    #endregion
+    
+    #region Game View Window Config
+
+    private Vector2 _gameViewSize;
+    private Vector2 _gameViewWindowPosition;
+    #endregion
+
+    private void InitializeUIConfig()
+    {
+        _sceneWindowSize = new Vector2(300, ClientSize.Y - 19);
+        
+        _inspectorWindowSize = new Vector2(InspectorWindowWidth, ClientSize.Y - 19);
+        _inspectorWindowPosition = new Vector2(ClientSize.X - InspectorWindowWidth, 19);
+
+        _gameViewSize = new Vector2(ClientSize.X - SceneWindowWidth - InspectorWindowWidth, ClientSize.Y);
+        _gameViewWindowPosition = new Vector2(SceneWindowWidth, 19);
+    }
     
     private void RenderImGuiLayer()
     {
         // Views
+        DrawSceneNavWindow();
+        DrawInspectorWindow();
         DrawGameView();
-        DrawSceneMenu();
-        
+
         // Main menu
         DrawMainMenu();
     }
 
+    private void DrawSceneNavWindow()
+    {
+        Console.WriteLine(ClientSize.Y);
+        ImGui.SetNextWindowSize(_sceneWindowSize);
+        ImGui.SetNextWindowPos(SceneWindowPosition);
+        ImGui.Begin("Scene Navigation", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
+        
+        ImGui.Text("Need to make tree view");
+        
+        ImGui.End();
+    }
+
     private void DrawGameView()
     {
-        ImGui.Begin("Window");
-
-        var size = ImGui.GetContentRegionAvail();
-        _gameViewFrameBuffer.Resize((int)size.X, (int)size.Y);
+        ImGui.SetNextWindowSize(_gameViewSize);
+        ImGui.SetNextWindowPos(_gameViewWindowPosition);
+        ImGui.Begin("Window", ImGuiWindowFlags.NoCollapse);
+        
+        // var size = ImGui.GetContentRegionAvail();
+        var size = _gameViewSize;
+        // _gameViewFrameBuffer.Resize((int)size.X, (int)size.Y);
         GL.Viewport(0, 0, (int)ClientSize.X, (int)ClientSize.Y);
-            
+
         var pos = ImGui.GetCursorScreenPos();
         ImGui.GetWindowDrawList().AddImage((IntPtr)_gameViewFrameBuffer.BufferTexture, 
             pos, 
@@ -39,8 +86,10 @@ public partial class MainRenderWindow
         ImGui.End();
     }
 
-    private void DrawSceneMenu()
+    private void DrawInspectorWindow()
     {
+        ImGui.SetNextWindowSize(_inspectorWindowSize);
+        ImGui.SetNextWindowPos(_inspectorWindowPosition);
         ImGui.Begin("Inspector");
 
         ImGui.End();
