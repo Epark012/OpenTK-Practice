@@ -28,6 +28,9 @@ namespace OpenTK_Renderer
             // Initialize UI configs
             InitializeUIConfig();
             
+            // Initialize interaction
+            InitializeInteraction();
+            
             // TODO setting by mask
             // Enable depth
             GL.Enable(EnableCap.DepthTest);
@@ -49,9 +52,10 @@ namespace OpenTK_Renderer
             
             // Initialize fields
             _camera = _gameViewScene.Camera;
-            // CursorState = CursorState.Grabbed;
             
             _controller = new GUIController(ClientSize.X, ClientSize.Y);
+            
+            // TODO I don't know why the ratio is different when using 1200, 1000 stuff
             _gameViewFrameBuffer = new FrameBuffer(ClientSize.X, ClientSize.Y);
         }
 

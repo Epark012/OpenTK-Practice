@@ -27,6 +27,8 @@ public partial class MainRenderWindow
 
     private Vector2 _gameViewSize;
     private Vector2 _gameViewWindowPosition;
+    private Vector2 _lastCachedMousePosition;
+    
     #endregion
 
     private void InitializeUIConfig()
@@ -38,6 +40,11 @@ public partial class MainRenderWindow
 
         _gameViewSize = new Vector2(ClientSize.X - SceneWindowWidth - InspectorWindowWidth, ClientSize.Y);
         _gameViewWindowPosition = new Vector2(SceneWindowWidth, 19);
+
+        _onGameViewActivated += activated =>
+        {
+            // TODO: Cache mouse position
+        };
     }
     
     private void RenderImGuiLayer()
@@ -53,7 +60,6 @@ public partial class MainRenderWindow
 
     private void DrawSceneNavWindow()
     {
-        Console.WriteLine(ClientSize.Y);
         ImGui.SetNextWindowSize(_sceneWindowSize);
         ImGui.SetNextWindowPos(SceneWindowPosition);
         ImGui.Begin("Scene Navigation", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
@@ -68,7 +74,6 @@ public partial class MainRenderWindow
         ImGui.SetNextWindowSize(_gameViewSize);
         ImGui.SetNextWindowPos(_gameViewWindowPosition);
         ImGui.Begin("Window", ImGuiWindowFlags.NoCollapse);
-        
         // var size = ImGui.GetContentRegionAvail();
         var size = _gameViewSize;
         // _gameViewFrameBuffer.Resize((int)size.X, (int)size.Y);
@@ -81,8 +86,7 @@ public partial class MainRenderWindow
             _min, 
             _max);
 
-        _gameViewActive = ImGui.IsWindowFocused();
-            
+        GameViewActive = ImGui.IsWindowFocused();
         ImGui.End();
     }
 
