@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
 namespace OpenTK_Renderer;
@@ -7,7 +8,25 @@ public class RenderWindow : GameWindow
 {
     protected RenderSetting RenderSetting;
 
-    public RenderWindow(int width, int height, string title, int targetFrame = 60) : base(new GameWindowSettings() { UpdateFrequency = targetFrame }, new NativeWindowSettings{ Title = title, ClientSize = (width, height)})
+    /// <summary>
+    /// Constructor setting window state
+    /// </summary>
+    /// <param name="title">Title of window</param>
+    /// <param name="windowState">Window state for window</param>
+    /// <param name="targetFrameRate">Target frame rate to render</param>
+    public RenderWindow(WindowState windowState, string title, int targetFrameRate = 60) : base(new GameWindowSettings() {UpdateFrequency = targetFrameRate}, new NativeWindowSettings{ Title = title, WindowState = windowState})
+    {
+        RenderSetting = new RenderSetting();
+    }
+    
+    /// <summary>
+    /// Constructor setting window size
+    /// </summary>
+    /// <param name="width">Width of window</param>
+    /// <param name="height">Height of window</param>
+    /// <param name="title">Title of window</param>
+    /// <param name="targetFrameRate">Target frame rate to render</param>
+    public RenderWindow(int width, int height, string title, int targetFrameRate = 60) : base(new GameWindowSettings() { UpdateFrequency = targetFrameRate }, new NativeWindowSettings{ Title = title, ClientSize = (width, height)})
     {
         RenderSetting = new RenderSetting();
     }

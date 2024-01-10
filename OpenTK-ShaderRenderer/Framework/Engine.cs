@@ -1,4 +1,7 @@
-﻿namespace OpenTK_Renderer;
+﻿using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
+
+namespace OpenTK_Renderer;
 
 public class Engine : IDisposable
 {
@@ -6,7 +9,10 @@ public class Engine : IDisposable
     
     public Engine()
     {
-        _mainRenderWindow = new MainRenderWindow(1440, 1080, "Main Window");
+        // TODO get proper resolution 
+        _mainRenderWindow = new MainRenderWindow(WindowState.Maximized, "Main Window");
+        var area = Monitors.GetMonitorFromWindow(_mainRenderWindow).ClientArea;
+        // Console.WriteLine($"Setting - {area.Size.X}, {area.Size.Y}");
     }
 
     public void Run()

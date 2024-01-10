@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using ImGuiNET;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -13,6 +14,33 @@ public partial class MainRenderWindow
     private bool _firstMove = true;
     private Vector2 _lastPos;
 
+    // Game view
+    private bool _gameViewActive;
+    private bool GameViewActive
+    {
+        get => _gameViewActive;
+        set
+        {
+            if (_gameViewActive.Equals(value))
+            {
+                // Ignore same value
+                return;
+            }
+
+            _gameViewActive = value;
+            _onGameViewActivated?.Invoke(_gameViewActive);
+        }
+    }
+
+    private Action<bool> _onGameViewActivated;
+    
+    private void InitializeInteraction()
+    {
+        _onGameViewActivated += activated =>
+        {
+            CursorState = activated ? CursorState.Grabbed : CursorState.Normal;
+        };
+    }
     
     /// <summary>
     /// Process Mouse Input
@@ -52,7 +80,9 @@ public partial class MainRenderWindow
 
         if (KeyboardState.IsKeyDown(Keys.Escape))
         {
-            Close();
+            // Close();
+            GameViewActive = false;
+            ImGui.SetWindowFocus("Scene Navigation");
         }
 
         var input = KeyboardState;
@@ -84,5 +114,23 @@ public partial class MainRenderWindow
         {
             _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
         }
+    }
+
+    /// <summary>
+    /// Process input 
+    /// </summary>
+    /// <param name="args">Frame event args</param>
+    private void ProcessInput(FrameEventArgs args)
+    {
+        if (!GameViewActive)
+        {
+            return;
+        }
+        
+        // Process input
+        ProcessKeyboardInput(args);
+
+        // Get the mouse state
+        ProcessMouseInput();
     }
 }

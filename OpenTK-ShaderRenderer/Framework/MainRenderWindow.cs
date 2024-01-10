@@ -6,26 +6,32 @@ using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OpenTK_Renderer
 {
-    // TODO Create light classes and use ImguiNet    
+    // TODO Resize frame buffer
     /// <summary>
     /// Partial class for rendering
     /// </summary>
     public partial class MainRenderWindow : RenderWindow
     {
-        public MainRenderWindow(int width, int height, string title, int targetFrame = 60) : base(width, height, title, targetFrame) { }
+        public MainRenderWindow(WindowState windowState, string title, int targetFrameRate = 60) : base(windowState, title, targetFrameRate) { }
+        public MainRenderWindow(int width, int height, string title, int targetFrameRate = 60) : base(width, height, title, targetFrameRate) { }
         
-        private Scene _scene;
+        private Scene _gameViewScene;
         private Camera _camera;
-        private FrameBuffer _fbo;
+        private FrameBuffer _gameViewFrameBuffer;
 
         private GUIController _controller;
 
         protected override void OnLoad()
         {
             base.OnLoad();
-
-            // TODO setting by mask
             
+            // Initialize UI configs
+            InitializeUIConfig();
+            
+            // Initialize interaction
+            InitializeInteraction();
+            
+            // TODO setting by mask
             // Enable depth
             GL.Enable(EnableCap.DepthTest);
             
@@ -41,16 +47,16 @@ namespace OpenTK_Renderer
             // Turn off render Skybox
             RenderSetting.RenderSkybox = false;
             
-            _scene = new Blending(RenderSetting,
-                new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y));
+            _gameViewScene = new Shadow(RenderSetting,
+                new Camera(Vector3.UnitZ * 3, _gameViewSize.X / (float)_gameViewSize.Y));
             
             // Initialize fields
-            _camera = _scene.Camera;
-            // CursorState = CursorState.Grabbed;
-
-            _fbo = new FrameBuffer(ClientSize.X, ClientSize.Y);
+            _camera = _gameViewScene.Camera;
             
             _controller = new GUIController(ClientSize.X, ClientSize.Y);
+            
+            // TODO I don't know why the ratio is different when using 1200, 1000 stuff
+            _gameViewFrameBuffer = new FrameBuffer(ClientSize.X, ClientSize.Y);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -58,40 +64,34 @@ namespace OpenTK_Renderer
             base.OnUpdateFrame(args);
 
             // Process input
-            ProcessKeyboardInput(args);
-
-            // Get the mouse state
-            ProcessMouseInput();
+            ProcessInput(args);
         }
-        
+
         protected override void OnRenderFrame(FrameEventArgs args)
         {
             base.OnRenderFrame(args);
             
             Title = $"Running - Vsync: {VSync}) FPS: {1f / args.Time:0}";
-
-            _controller.Update(this, (float)args.Time);
             
+            _controller.Update(this, (float)args.Time);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            // Draw UI
+            // ImGui.ShowDemoWindow();
+            RenderImGuiLayer();
+
             // Render scene
-            _fbo.Bind();
+            _gameViewFrameBuffer.Bind(true);
             
             {
-                _scene.Update();
-                _scene.Render();
+                _gameViewScene.Update();
+                _gameViewScene.Render();
             }
             
-            // Second pass
-            _fbo.Process();
+            _gameViewFrameBuffer.Bind(false);
             
-            
-            // Enable Docking
-            // ImGui.DockSpaceOverViewport();
-            // ImGui.ShowDemoWindow();
-
             _controller.Render();
-            
             GUIController.CheckGLError("End of frame");
-            
             SwapBuffers();
         }
 
@@ -104,9 +104,9 @@ namespace OpenTK_Renderer
             base.OnResize(e);
 
             // _fbo?.Initialize(Size.X, Size.Y);
-            GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
-            
-            _controller.WindowResized(ClientSize.X, ClientSize.Y);
+
+            // _fbo.Resize();
+            // _controller.WindowResized(ClientSize.X, ClientSize.Y);
         }
 
         protected override void OnTextInput(TextInputEventArgs e)
