@@ -25,7 +25,7 @@ public class PointLight : Light
         _quadratic = quadratic;
     }
 
-    public override void Update()
+    public override void Update(Shader shader)
     {
         // Update for dynamic lighting
     }

@@ -80,7 +80,7 @@ namespace OpenTK_Renderer
             // ImGui.ShowDemoWindow();
             RenderImGuiLayer();
 
-            // Render scene
+            // Render game view
             _gameViewFrameBuffer.Bind(true);
             
             {

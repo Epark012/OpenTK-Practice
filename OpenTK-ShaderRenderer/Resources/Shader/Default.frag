@@ -16,6 +16,8 @@ struct DirLight
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+    
+    float intensity;
 };
  
 // Point light
@@ -50,7 +52,10 @@ struct SpotLight
 };
 
 uniform Material material;
+
+// Directional light
 uniform DirLight dirLight;
+uniform float dirIntensity = 1.0f;
  
 // number of point lighting
 #define NR_POINT_LIGHTS 4
@@ -118,7 +123,9 @@ vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));
     vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));
     vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
-    return (ambient + diffuse + specular);
+    
+    light.intensity = dirIntensity;
+    return (ambient + diffuse + specular) * light.intensity;
 }
 
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)

@@ -29,7 +29,7 @@ public class SpotLight : Light
         OuterCutOff = outerCutOff;
     }
 
-    public override void Update()
+    public override void Update(Shader shader)
     {
         // Update for dynamic lighting
     }

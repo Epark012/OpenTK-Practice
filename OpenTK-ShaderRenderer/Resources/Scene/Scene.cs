@@ -23,6 +23,8 @@ public class Scene
     // Light
     protected readonly List<Light> Lights = new ();
     
+    public List<DirectionalLight> DirectionalLight = new();
+    
     private Matrix4 _view = Matrix4.Identity;
     private Matrix4 _projection = Matrix4.Identity;
 
@@ -58,6 +60,16 @@ public class Scene
         else
         {
             GL.ClearColor(RenderSetting.DefaultBackGroundColor);
+        }
+
+        foreach (var light in Lights)
+        {
+            if (light is not DirectionalLight directionalLight)
+            {
+                continue;
+            }
+            
+            DirectionalLight.Add(directionalLight);
         }
         
         OnInitialized?.Invoke(this);

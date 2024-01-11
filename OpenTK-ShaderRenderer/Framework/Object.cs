@@ -110,7 +110,7 @@ public class Object
         // Set runtime light uniforms
         foreach (var appliedLight in _appliedLights)
         {
-            appliedLight.Update();
+            appliedLight.Update(Shader);
         }
         
         GL.UseProgram(0);

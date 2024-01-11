@@ -17,7 +17,7 @@ public partial class MainRenderWindow
 
     #region Inspector Window Config
 
-    private static readonly float InspectorWindowWidth = 300f;
+    private static readonly float InspectorWindowWidth = 450f;
     private static Vector2 _inspectorWindowPosition;
     private Vector2 _inspectorWindowSize;
 
@@ -96,6 +96,22 @@ public partial class MainRenderWindow
         ImGui.SetNextWindowPos(_inspectorWindowPosition);
         ImGui.Begin("Inspector");
 
+        ImGui.Text("Directional light");
+
+        ImGui.Indent();
+        foreach (var dirLight in _gameViewScene.DirectionalLight)
+        {
+            ImGui.Text("Intensity");
+            ImGui.SameLine();
+            ImGui.SliderFloat("",ref dirLight.Intensity, 0, 10);
+            
+            // ImGui.Text("Direction");
+            // ImGui.SliderFloat("X",ref dirLight.Direction.X, 0, 180);
+            // ImGui.SliderFloat("Y",ref dirLight.Direction.Y, 0, 180);
+            // ImGui.SliderFloat("Z",ref dirLight.Direction.Z, 0, 180);
+        }
+        ImGui.Unindent();
+        
         ImGui.End();
     }
 
