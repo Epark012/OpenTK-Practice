@@ -102,9 +102,9 @@ namespace OpenTK_Renderer
             }
         }
 
-        public void Use()
+        public void Use(bool forceToUse = false)
         {
-            if (!_isInitialized)
+            if (!_isInitialized && !forceToUse)
             {
                 Console.WriteLine($"Shader {ID} is not initialized, wrong access to use this shader");
             }

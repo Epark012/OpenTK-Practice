@@ -5,7 +5,6 @@ namespace OpenTK_Renderer
 { 
     public static class ShaderExtended
     {
-
         /// <summary>
         /// Extension method to set uniform
         /// </summary>

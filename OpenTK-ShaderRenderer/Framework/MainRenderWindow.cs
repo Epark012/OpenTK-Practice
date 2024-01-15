@@ -1,6 +1,7 @@
 ﻿using OpenTK_Renderer.GUI;
 using OpenTK_Renderer.Resources.Scene;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using Vector3 = OpenTK.Mathematics.Vector3;
 
@@ -20,6 +21,9 @@ namespace OpenTK_Renderer
         private FrameBuffer _gameViewFrameBuffer;
 
         private GUIController _controller;
+        private int _depthmap;
+        private int _depthmapFbo;
+        private Shader _depthShader;
 
         protected override void OnLoad()
         {
@@ -57,6 +61,23 @@ namespace OpenTK_Renderer
             
             // TODO I don't know why the ratio is different when using 1200, 1000 stuff
             _gameViewFrameBuffer = new FrameBuffer(ClientSize.X, ClientSize.Y);
+
+            _depthShader = new Shader("Resources/Shader/Depth.vert", "Resources/Shader/Depth.frag");
+
+            _depthmapFbo = GL.GenFramebuffer();
+            _depthmap = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, _depthmap);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent, 1024, 1024, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+            
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, _depthmapFbo);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, _depthmap, 0);
+            GL.DrawBuffer(DrawBufferMode.None);
+            GL.ReadBuffer(ReadBufferMode.None);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -80,6 +101,24 @@ namespace OpenTK_Renderer
             // ImGui.ShowDemoWindow();
             RenderImGuiLayer();
 
+            // Render depth of scene from light's perspective
+            var lightProjection = Matrix4.CreateOrthographic(20, 20, 1, 7.5f);
+            var lightView = Matrix4.LookAt(_gameViewScene.DirectionalLight[0].Direction, Vector3.Zero, Vector3.Zero);
+            var lightSpaceMatrix = lightView * lightProjection;
+            
+            _depthShader.Use(true);
+            _depthShader.SetUniform("lightSpaceMatrix", lightSpaceMatrix);
+            
+            GL.Viewport(0, 0, 1024, 1024);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, _depthmapFbo);
+                GL.Clear(ClearBufferMask.DepthBufferBit);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                _gameViewScene.Render();
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            
+            GL.Viewport(0,0, ClientSize.X, ClientSize.Y);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                
             // Render game view
             _gameViewFrameBuffer.Bind(true);
             

@@ -49,13 +49,19 @@ public partial class MainRenderWindow
     
     private void RenderImGuiLayer()
     {
+        ImGui.BeginDisabled(_gameViewActive);
+        
+        // Main menu
+        DrawMainMenu();
+        
         // Views
         DrawSceneNavWindow();
         DrawInspectorWindow();
+        
+        ImGui.EndDisabled();
+        
+        // Draw game view at last
         DrawGameView();
-
-        // Main menu
-        DrawMainMenu();
     }
 
     private void DrawSceneNavWindow()
@@ -124,7 +130,6 @@ public partial class MainRenderWindow
                 if (ImGui.MenuItem("Add"))
                 {
                     // Add model
-                    
                 }
                     
                 ImGui.Separator();
@@ -139,7 +144,7 @@ public partial class MainRenderWindow
                 
             if (ImGui.BeginMenu("Edit"))
             {
-                if (ImGui.MenuItem("#######"))
+                if (ImGui.MenuItem("######"))
                 {
                     // Add function
                 }
